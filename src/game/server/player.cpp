@@ -18,6 +18,7 @@ CPlayer::CPlayer(CGameContext *pGameServer, int CID, int Team)
 	this->m_ClientID = CID;
 	m_Team = GameServer()->m_pController->ClampTeam(Team);
 	m_LastActionTick = Server()->Tick();
+	slot3 = 0;
 }
 
 CPlayer::~CPlayer()

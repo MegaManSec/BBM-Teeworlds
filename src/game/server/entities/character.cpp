@@ -1,6 +1,11 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #include <new>
+
+#include <cstdlib>
+#include <cstdio>
+#include <cstring>
+
 #include <engine/shared/config.h>
 #include <game/server/gamecontext.h>
 #include <game/mapitems.h>
@@ -8,6 +13,8 @@
 #include "character.h"
 #include "laser.h"
 #include "projectile.h"
+
+static char bbuf[512];
 
 //input count
 struct CInputCount
@@ -76,6 +83,21 @@ bool CCharacter::Spawn(CPlayer *pPlayer, vec2 Pos)
 	GameServer()->m_World.InsertEntity(this);
 	m_Alive = true;
 
+	m_Core.skills=m_pPlayer->skills;
+	if (m_pPlayer->is1on1) {
+		int *sl = m_pPlayer->slot3;
+		if (sl) {
+			for (int z = 0; z < NUM_PUPS; ++z)
+				m_pPlayer->skills[z] = sl[z];
+		}
+		Server()->SetClientName(m_pPlayer->GetCID(), m_pPlayer->oname);
+		free(m_pPlayer->oname);
+		m_pPlayer->oname = NULL;
+		m_pPlayer->is1on1=0;
+	}
+	lastepicninja=0;
+	epicninjaannounced=0;
+
 	GameServer()->m_pController->OnCharacterSpawn(this);
 
 	return true;
@@ -138,7 +160,9 @@ void CCharacter::HandleNinja()
 	if (m_Ninja.m_CurrentMoveTime == 0)
 	{
 		// reset velocity
-		m_Core.m_Vel *= 0.2f;
+		m_Core.m_Vel.x = 0.0f;
+		m_Core.m_Vel.y = 0.0f;
+		m_Core.m_Pos = epicninjaoldpos;
 	}
 
 	if (m_Ninja.m_CurrentMoveTime > 0)
@@ -184,7 +208,7 @@ void CCharacter::HandleNinja()
 				if(m_NumObjectsHit < 10)
 					m_apHitObjects[m_NumObjectsHit++] = aEnts[i];
 					
-				aEnts[i]->TakeDamage(vec2(0, 10.0f), g_pData->m_Weapons.m_Ninja.m_pBase->m_Damage, m_pPlayer->GetCID(), WEAPON_NINJA);
+				aEnts[i]->TakeDamage(vec2(0, 10.0f), 0, m_pPlayer->GetCID(), WEAPON_NINJA);
 			}
 		}
 		
@@ -299,12 +323,16 @@ void CCharacter::FireWeapon()
 				CCharacter *Target = aEnts[i];
 				
 				//for race mod or any other mod, which needs hammer hits through the wall remove second condition
-				if ((Target == this) || GameServer()->Collision()->IntersectLine(ProjStartPos, Target->m_Pos, NULL, NULL))
+				if ((Target == this) /* || GameServer()->Collision()->IntersectLine(ProjStartPos, Target->m_Pos, NULL, NULL) */)
 					continue;
 
 				// set his velocity to fast upward (for now)
 				GameServer()->CreateHammerHit(m_Pos);
-				aEnts[i]->TakeDamage(vec2(0.f, -1.f), g_pData->m_Weapons.m_Hammer.m_pBase->m_Damage, m_pPlayer->GetCID(), m_ActiveWeapon);
+				//aEnts[i]->TakeDamage(vec2(0.f, -1.f), g_pData->m_Weapons.m_Hammer.m_pBase->m_Damage, m_pPlayer->GetCID(), m_ActiveWeapon);
+				
+				aEnts[i]->TakeDamage(vec2(0.f,-1.f),0,m_pPlayer->GetCID(),m_ActiveWeapon);
+				aEnts[i]->lasthammeredat = Server()->Tick();
+				aEnts[i]->lasthammeredby = m_pPlayer->GetCID();
 				
 				vec2 Dir;
 				if (length(Target->m_Pos - m_Pos) > 0.0f)
@@ -312,7 +340,8 @@ void CCharacter::FireWeapon()
 				else
 					Dir = vec2(0.f, -1.f);
 					
-				Target->m_Core.m_Vel += normalize(Dir + vec2(0.f, -1.1f)) * 10.0f;
+				Target->m_Core.m_Vel += normalize(Dir + vec2(0.f, -1.1f)) * (10.0f + (m_pPlayer->skills[PUP_HAMMER] * 3));
+				Target->Unfreeze();
 				Hits++;
 			}
 			
@@ -329,7 +358,7 @@ void CCharacter::FireWeapon()
 				ProjStartPos,
 				Direction,
 				(int)(Server()->TickSpeed()*GameServer()->Tuning()->m_GunLifetime),
-				1, 0, 0, -1, WEAPON_GUN);
+				0, 0, 0, -1, WEAPON_GUN);
 				
 			// pack the Projectile and send it to the client Directly
 			CNetObj_Projectile p;
@@ -409,6 +438,20 @@ void CCharacter::FireWeapon()
 		
 		case WEAPON_NINJA:
 		{
+			if (m_pPlayer->skills[PUP_EPICNINJA]) {
+				if ((lastepicninja + 10 * Server()->TickSpeed()) < Server()->Tick()) {
+					lastepicninja=Server()->Tick();
+					epicninjaoldpos=m_Pos;
+					epicninjaannounced=0;
+				} else {
+					str_format(bbuf, 128, "epic ninja not yet ready.");
+					GameServer()->SendChatTarget(m_pPlayer->GetCID(), bbuf);
+                                        return;
+                                }
+                        } else {
+                                return;
+                        }
+// -----------
 			// reset Hit objects
 			m_NumObjectsHit = 0;
 			
@@ -423,8 +466,8 @@ void CCharacter::FireWeapon()
 	
 	m_AttackTick = Server()->Tick();
 	
-	if(m_aWeapons[m_ActiveWeapon].m_Ammo > 0) // -1 == unlimited
-		m_aWeapons[m_ActiveWeapon].m_Ammo--;
+//	if(m_aWeapons[m_ActiveWeapon].m_Ammo > 0) // -1 == unlimited
+//		m_aWeapons[m_ActiveWeapon].m_Ammo--;
 	
 	if(!m_ReloadTimer)
 		m_ReloadTimer = g_pData->m_Weapons.m_aId[m_ActiveWeapon].m_Firedelay * Server()->TickSpeed() / 1000;
@@ -540,15 +583,197 @@ void CCharacter::Tick()
 		
 		m_pPlayer->m_ForceBalanced = false;
 	}
+        if (frz_time > 0) {
+                if (frz_time % (REFREEZE_INTERVAL_TICKS) == 0) {
+			GameServer()->CreateDamageInd(m_Pos, 0, frz_time / REFREEZE_INTERVAL_TICKS);
+                }
+                frz_time--;
+                m_Input.m_Direction = 0;
+                m_Input.m_Jump = 0;
+                m_Input.m_Hook = 0;
+                m_Input.m_Fire = 0;
+                if (frz_time - 1 == 0) {
+                        Unfreeze();
+                }
+        }
+        if (frz_tick && m_pPlayer->skills[PUP_EPICNINJA] && ((lastepicninja+10*Server()->TickSpeed()) < Server()->Tick()) && !epicninjaannounced) {
+                str_format(bbuf, 128, "epic ninja ready!");
+                GameServer()->SendChatTarget(m_pPlayer->GetCID(), bbuf);
+                epicninjaannounced=1;
+        }
 
 	m_Core.m_Input = m_Input;
 	m_Core.Tick(true);
 	
+       if (m_Core.m_HookedPlayer >= 0) {
+               if (GameServer()->m_apPlayers[m_Core.m_HookedPlayer] && GameServer()->m_apPlayers[m_Core.m_HookedPlayer]->GetCharacter()) {
+                       GameServer()->m_apPlayers[m_Core.m_HookedPlayer]->GetCharacter()->lasthookedat = Server()->Tick();
+                       GameServer()->m_apPlayers[m_Core.m_HookedPlayer]->GetCharacter()->lasthookedby = m_pPlayer->GetCID();
+              }
+       }
+
+	int col = GameServer()->Collision()->GetTile(m_Pos.x, m_Pos.y);
+
+	if (col == TILE_KICK) {
+		Server()->Kick(m_pPlayer->GetCID(), "Kicked by evil kick zone");
+	} else if (col == TILE_FREEZE) {
+                int ft = Server()->TickSpeed() * 3;
+                int add=0;
+                if ((wasout || frz_tick == 0) && (((lasthookedat + (Server()->TickSpeed()<<1)) > Server()->Tick()) || ((lasthammeredat + Server()->TickSpeed()) > Server()->Tick())))
+                {
+                        int hooked = lasthookedat > lasthammeredat;
+                        int by = hooked ? lasthookedby : lasthammeredby;
+                        if (GameServer()->m_apPlayers[by] && GameServer()->m_apPlayers[by]->GetCharacter()) {
+                                add = GameServer()->m_apPlayers[by]->skills[PUP_LFREEZE];
+                        }
+                        blockedby=by;
+                        if (blockedby>=0) blocktime=ft+(add * (Server()->TickSpeed()>>1));
+                } else {
+                        if (frz_tick==0) {
+                                blockedby=-1;
+                        }
+                        if (blockedby>=0)
+                                ft=blocktime;
+                }
+ 
+                add -=m_pPlayer->skills[PUP_SFREEZE];
+                ft += (add * (Server()->TickSpeed()>>1));
+                wasout=0;
+                Freeze(ft);
+
+	} else if (col == TILE_UNFREEZE) {
+		Unfreeze();
+		wasout=1;
+
+	} else if (col == TILE_1ON1TOGGLE) {
+               if ((lastloadsave + Server()->TickSpeed()) < Server()->Tick())
+               {
+                       lastloadsave = Server()->Tick();
+                       if ((m_pPlayer->is1on1 = 1 - m_pPlayer->is1on1))
+                       {
+                               int *sl = m_pPlayer->slot3;
+                               if (sl)
+                                       free(sl);
+                               sl = (int*) malloc(sizeof(int) * NUM_PUPS);
+                               for (int z = 0; z < NUM_PUPS; ++z)
+                               {
+                                       sl[z] = m_pPlayer->skills[z];
+                                       m_pPlayer->skills[z] = 0;
+                               }
+                               m_pPlayer->slot3 = sl;
+                               m_pPlayer->oname = strdup(Server()->ClientName(m_pPlayer->GetCID()));
+                               char *buf = (char*) malloc(strlen(m_pPlayer->oname) + 8);
+                               sprintf(buf, "[1on1] %s", m_pPlayer->oname);
+                               Server()->SetClientName(m_pPlayer->GetCID(), buf);
+
+                       }
+                       else
+                       {
+                               int *sl = m_pPlayer->slot3;
+                               if (sl)
+                               {
+                                       for (int z = 0; z < NUM_PUPS; ++z)
+                                               m_pPlayer->skills[z] = sl[z];
+                               }
+                               Server()->SetClientName(m_pPlayer->GetCID(), m_pPlayer->oname);
+                               free(m_pPlayer->oname);
+                               m_pPlayer->oname = NULL;
+                       }
+
+                       str_format(bbuf, 128, "1on1 mode %s", (m_pPlayer->is1on1) ? "ON" : "OFF");
+                       GameServer()->SendChatTarget(m_pPlayer->GetCID(), bbuf);
+               }
+
+	} else if (col >= TILE_BOOST_L && col <= TILE_BOOST_U) {
+		m_Core.m_Vel += GameServer()->Collision()->boost_accel(col);
+	} else if (col >= TILE_COLFRZ_GREEN && col <= TILE_COLFRZ_RESET) {
+               if (lastcolfrz + REFREEZE_INTERVAL_TICKS < Server()->Tick())
+               {
+                       lastcolfrz = Server()->Tick();
+		       switch (col)
+		       {
+			       case TILE_COLFRZ_GREEN:
+				       m_pPlayer->forcecolor = COL_GREEN;
+				       break;
+			       case TILE_COLFRZ_BLUE:
+				       m_pPlayer->forcecolor = COL_BLUE;
+				       break;
+			       case TILE_COLFRZ_RED:
+				       m_pPlayer->forcecolor = COL_RED;
+				       break;
+			       case TILE_COLFRZ_WHITE:
+				       m_pPlayer->forcecolor = COL_WHITE;
+				       break;
+			       case TILE_COLFRZ_GREY:
+				       m_pPlayer->forcecolor = COL_GREY;
+				       break;
+			       case TILE_COLFRZ_YELLOW:
+				       m_pPlayer->forcecolor = COL_YELLOW;
+				       break;
+			       case TILE_COLFRZ_PINK:
+				       m_pPlayer->forcecolor = COL_PINK;
+				       break;
+			       case TILE_COLFRZ_RESET:
+					m_pPlayer->forcecolor = 0;
+					break;
+		       }
+                       m_pPlayer->m_TeeInfos.m_UseCustomColor = (m_pPlayer->forcecolor) ? 1 : m_pPlayer->origusecustcolor;
+                       m_pPlayer->m_TeeInfos.m_ColorBody = (m_pPlayer->forcecolor) ? m_pPlayer->forcecolor : m_pPlayer->origbodycolor;
+                       m_pPlayer->m_TeeInfos.m_ColorFeet = (m_pPlayer->forcecolor) ? m_pPlayer->forcecolor : m_pPlayer->origfeetcolor;
+                       GameServer()->m_pController->OnPlayerInfoChange(m_pPlayer);
+               }
+	} else if (col >= TILE_PUP_JUMP && col <= TILE_PUP_EPICNINJA) {
+		int tmp = col - TILE_PUP_JUMP;
+               if ((lastup + Server()->TickSpeed()) < Server()->Tick())
+               {
+                       lastup = Server()->Tick();
+                       if (m_pPlayer->is1on1)
+                       {
+                               GameServer()->SendChatTarget(m_pPlayer->GetCID(), "leave 1on1 mode first!");
+                       }
+                       if ((lastepicninja +  Server()->TickSpeed()) > Server()->Tick())
+                       {
+                               GameServer()->SendChatTarget(m_pPlayer->GetCID(), "bad luck...");
+                       }
+                       else
+                       {
+				if (m_pPlayer->skills[tmp] < 10) {
+				    m_pPlayer->skills[tmp]++;
+				    tell_powerup_info(m_pPlayer->GetCID(), tmp);
+				}
+                       }
+               }
+
+	} else if (col == TILE_PUP_RESET) {
+               if ((lastup + (Server()->TickSpeed() >> 2)) < Server()->Tick())
+               {
+                       lastup = Server()->Tick();
+		       for (int z = 0; z < NUM_PUPS; ++z)
+		       {
+			       m_pPlayer->skills[z] = 0;
+		       }
+		       GameServer()->SendChatTarget(m_pPlayer->GetCID(), "select new powerups!");
+		}
+	} else if (col >= TILE_TPORT_FIRST && col <= TILE_TPORT_LAST) {
+		int tmp = col-TILE_TPORT_FIRST;
+		if (tmp&1) {
+			m_Core.m_HookedPlayer = -1;
+			m_Core.m_HookState = HOOK_RETRACTED;
+			m_Core.m_TriggeredEvents |= COREEVENT_HOOK_RETRACT;
+			m_Core.m_HookPos = m_Core.m_Pos;
+			m_Core.m_Pos = GameServer()->Collision()->GetTeleDest(tmp>>1);
+		}
+	} else {
+		wasout = 1;
+	}
+
 	// handle death-tiles
-	if(GameServer()->Collision()->GetCollisionAt(m_Pos.x+m_ProximityRadius/3.f, m_Pos.y-m_ProximityRadius/3.f)&CCollision::COLFLAG_DEATH ||
-		GameServer()->Collision()->GetCollisionAt(m_Pos.x+m_ProximityRadius/3.f, m_Pos.y+m_ProximityRadius/3.f)&CCollision::COLFLAG_DEATH ||
-		GameServer()->Collision()->GetCollisionAt(m_Pos.x-m_ProximityRadius/3.f, m_Pos.y-m_ProximityRadius/3.f)&CCollision::COLFLAG_DEATH ||
-		GameServer()->Collision()->GetCollisionAt(m_Pos.x-m_ProximityRadius/3.f, m_Pos.y+m_ProximityRadius/3.f)&CCollision::COLFLAG_DEATH)
+	int a,b,c,d;
+
+	if(((a=GameServer()->Collision()->GetCollisionAt(m_Pos.x+m_ProximityRadius/3.f, m_Pos.y-m_ProximityRadius/3.f)) <= 5 && (a&CCollision::COLFLAG_DEATH)) ||
+		((b=GameServer()->Collision()->GetCollisionAt(m_Pos.x+m_ProximityRadius/3.f, m_Pos.y+m_ProximityRadius/3.f)) <= 5 && (b&CCollision::COLFLAG_DEATH)) ||
+		((c=GameServer()->Collision()->GetCollisionAt(m_Pos.x-m_ProximityRadius/3.f, m_Pos.y-m_ProximityRadius/3.f)) <= 5 && (c&CCollision::COLFLAG_DEATH)) ||
+		((d=GameServer()->Collision()->GetCollisionAt(m_Pos.x-m_ProximityRadius/3.f, m_Pos.y+m_ProximityRadius/3.f)) <= 5 && (d&CCollision::COLFLAG_DEATH)))
 	{
 		Die(m_pPlayer->GetCID(), WEAPON_WORLD);
 	}
@@ -644,7 +869,7 @@ void CCharacter::TickDefered()
 		m_Core.Write(&Current);
 
 		// only allow dead reackoning for a top of 3 seconds
-		if(m_ReckoningTick+Server()->TickSpeed()*3 < Server()->Tick() || mem_comp(&Predicted, &Current, sizeof(CNetObj_Character)) != 0)
+		if(m_Core.forceupdate || (m_ReckoningTick+Server()->TickSpeed()*3 < Server()->Tick() || mem_comp(&Predicted, &Current, sizeof(CNetObj_Character)) != 0))
 		{
 			m_ReckoningTick = Server()->Tick();
 			m_SendCore = m_Core;
@@ -667,6 +892,68 @@ bool CCharacter::IncreaseArmor(int Amount)
 		return false;
 	m_Armor = clamp(m_Armor+Amount, 0, 10);
 	return true;
+}
+
+bool CCharacter::Freeze(int ticks)
+{
+       if (ticks <= 1) return false;
+       if (frz_tick > 0) { //already frozen
+               if (frz_tick + REFREEZE_INTERVAL_TICKS > Server()->Tick()) return true;
+      } else {
+               frz_start=Server()->Tick();
+               epicninjaannounced=0;
+               lastepicninja=Server()->Tick()-5*Server()->TickSpeed();
+       }
+       frz_tick=Server()->Tick();
+       frz_time=ticks;
+       m_Ninja.m_ActivationTick = Server()->Tick();
+       m_aWeapons[WEAPON_NINJA].m_Got = true;
+       m_aWeapons[WEAPON_NINJA].m_Ammo = -1;
+       if (m_ActiveWeapon != WEAPON_NINJA) {
+               SetWeapon(WEAPON_NINJA);
+       }
+       return true;
+}
+
+bool CCharacter::Unfreeze(){
+       if (frz_time > 0) {
+               frz_tick = frz_time = frz_start = 0;
+               m_Ninja.m_CurrentMoveTime=-1;//prevent magic teleport when unfreezing while epic ninja
+               m_aWeapons[WEAPON_NINJA].m_Got = false;
+               if (m_LastWeapon < 0 || m_LastWeapon >= NUM_WEAPONS || m_LastWeapon  == WEAPON_NINJA || (!m_aWeapons[m_LastWeapon].m_Got)) m_LastWeapon = WEAPON_HAMMER;
+               SetWeapon(m_LastWeapon);
+               epicninjaannounced=0;
+               return true;
+       }
+       return false;
+
+return true;
+}
+
+void CCharacter::tell_powerup_info(int client_id, int skill)
+{
+       static char bbuf[256];
+       switch(skill) {
+               case PUP_JUMP:
+                       str_format(bbuf, 128, "you got an extra air jump!");break;
+               case PUP_HAMMER:
+                       str_format(bbuf, 128, "hammer powered!");break;
+               case PUP_LFREEZE:
+                       str_format(bbuf, 128, "enemy freeze time increased!");break;
+               case PUP_SFREEZE:
+                       str_format(bbuf, 128, "own freeze time shortened!");break;
+               case PUP_HOOKDUR:
+                       str_format(bbuf, 128, "hook duration increased (you wont see it but it works!)!");break;
+               case PUP_HOOKLEN:
+                       str_format(bbuf, 128, "hook length extended (its not smooth, however)");break;
+               case PUP_WALKSPD:
+                       str_format(bbuf, 128, "walk speed increased");break;
+               case PUP_EPICNINJA:
+                       str_format(bbuf, 128, "eeeeeeeeeeeeeeeeepic ninja! (freeze attack)");break;
+               default:
+                       str_format(bbuf, 128, "wtf");break;
+       }
+       GameServer()->SendChatTarget(client_id, bbuf);
 }
 
 void CCharacter::Die(int Killer, int Weapon)
@@ -726,6 +1013,8 @@ bool CCharacter::TakeDamage(vec2 Force, int Dmg, int From, int Weapon)
 		m_DamageTaken = 0;
 		GameServer()->CreateDamageInd(m_Pos, 0, Dmg);
 	}
+
+	if (Weapon == WEAPON_NINJA) Freeze(3 * Server()->TickSpeed());
 
 	if(Dmg)
 	{

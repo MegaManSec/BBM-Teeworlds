@@ -38,6 +38,19 @@ public:
 	// this is used for snapping so we know how we can clip the view for the player
 	vec2 m_ViewPos;
 	
+	int forcecolor;
+
+	int origusecustcolor;
+	int origbodycolor;
+	int origfeetcolor;
+
+	int skills[NUM_PUPS];
+
+	int *slot3;
+
+	int is1on1;
+	char *oname;
+
 	//
 	int m_Vote;
 	int m_VotePos;

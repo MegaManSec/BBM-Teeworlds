@@ -72,6 +72,7 @@ void CCharacterCore::Reset()
 	m_HookedPlayer = -1;
 	m_Jumped = 0;
 	m_TriggeredEvents = 0;
+	fuc = 0;
 }
 
 void CCharacterCore::Tick(bool UseInput)
@@ -79,6 +80,8 @@ void CCharacterCore::Tick(bool UseInput)
 	float PhysSize = 28.0f;
 	m_TriggeredEvents = 0;
 	
+	forceupdate = false;	
+
 	// get ground state
 	bool Grounded = false;
 	if(m_pCollision->CheckPoint(m_Pos.x+PhysSize/2, m_Pos.y+PhysSize/2+5))
@@ -90,14 +93,31 @@ void CCharacterCore::Tick(bool UseInput)
 
 	m_Vel.y += m_pWorld->m_Tuning.m_Gravity;
 	
-	float MaxSpeed = Grounded ? m_pWorld->m_Tuning.m_GroundControlSpeed : m_pWorld->m_Tuning.m_AirControlSpeed;
+	float MaxSpeed = Grounded ? (m_pWorld->m_Tuning.m_GroundControlSpeed*(1.0f+(skills?(skills[PUP_WALKSPD]/10.0f):0.0f))) : m_pWorld->m_Tuning.m_AirControlSpeed;
 	float Accel = Grounded ? m_pWorld->m_Tuning.m_GroundControlAccel : m_pWorld->m_Tuning.m_AirControlAccel;
 	float Friction = Grounded ? m_pWorld->m_Tuning.m_GroundFriction : m_pWorld->m_Tuning.m_AirFriction;
+	
+	if (Grounded) 
+	       extrajumpsleft=skills?skills[PUP_JUMP]:0;
+
 	
 	// handle input
 	if(UseInput)
 	{
+		ldir=m_Direction;
+
 		m_Direction = m_Input.m_Direction;
+
+		if (skills?(skills[PUP_WALKSPD]):0) {
+		       if (m_Direction != ldir) {
+			       fuc=30;
+		       }
+		}
+		if (fuc > 0) {
+		       if ((--fuc % 10) == 5) {
+			       forceupdate=1;
+		       }
+		}
 
 		// setup angle
 		float a = 0;
@@ -127,6 +147,10 @@ void CCharacterCore::Tick(bool UseInput)
 					m_TriggeredEvents |= COREEVENT_AIR_JUMP;
 					m_Vel.y = -m_pWorld->m_Tuning.m_AirJumpImpulse;
 					m_Jumped |= 3;
+					if (extrajumpsleft-- > 0) {
+					       m_Jumped&=~2;
+					}
+
 				}
 			}
 		}
@@ -187,11 +211,14 @@ void CCharacterCore::Tick(bool UseInput)
 	}
 	else if(m_HookState == HOOK_FLYING)
 	{
-		vec2 NewPos = m_HookPos+m_HookDir*m_pWorld->m_Tuning.m_HookFireSpeed;
-		if(distance(m_Pos, NewPos) > m_pWorld->m_Tuning.m_HookLength)
+		float hookfac = 1.0f+(skills?(skills[PUP_HOOKLEN]/5.0f):0.0f);
+		vec2 NewPos = m_HookPos+m_HookDir*(m_pWorld->m_Tuning.m_HookFireSpeed * hookfac);
+		float hole = m_pWorld->m_Tuning.m_HookLength*hookfac;
+		if(distance(m_Pos, NewPos) > hole)
 		{
 			m_HookState = HOOK_RETRACT_START;
-			NewPos = m_Pos + normalize(NewPos-m_Pos) * m_pWorld->m_Tuning.m_HookLength;
+			NewPos = m_Pos + normalize(NewPos-m_Pos) * hole;
+			forceupdate = true;
 		}
 		
 		// make sure that the hook doesn't go though the ground
@@ -200,7 +227,7 @@ void CCharacterCore::Tick(bool UseInput)
 		int Hit = m_pCollision->IntersectLine(m_HookPos, NewPos, &NewPos, 0);
 		if(Hit)
 		{
-			if(Hit&CCollision::COLFLAG_NOHOOK)
+			if(Hit<=5 && (Hit&CCollision::COLFLAG_NOHOOK))
 				GoingToRetract = true;
 			else
 				GoingToHitGround = true;
@@ -223,6 +250,7 @@ void CCharacterCore::Tick(bool UseInput)
 					{
 						m_TriggeredEvents |= COREEVENT_HOOK_ATTACH_PLAYER;
 						m_HookState = HOOK_GRABBED;
+						forceupdate  = true;
 						m_HookedPlayer = i;
 						Dist = distance(m_HookPos, p->m_Pos);
 					}
@@ -237,11 +265,13 @@ void CCharacterCore::Tick(bool UseInput)
 			{
 				m_TriggeredEvents |= COREEVENT_HOOK_ATTACH_GROUND;
 				m_HookState = HOOK_GRABBED;
+				forceupdate = true;
 			}
 			else if(GoingToRetract)
 			{
 				m_TriggeredEvents |= COREEVENT_HOOK_HIT_NOHOOK;
 				m_HookState = HOOK_RETRACT_START;
+				forceupdate = true;
 			}
 			
 			m_HookPos = NewPos;
@@ -294,7 +324,7 @@ void CCharacterCore::Tick(bool UseInput)
 
 		// release hook (max hook time is 1.25
 		m_HookTick++;
-		if(m_HookedPlayer != -1 && (m_HookTick > SERVER_TICK_SPEED+SERVER_TICK_SPEED/5 || !m_pWorld->m_apCharacters[m_HookedPlayer]))
+		if(m_HookedPlayer != -1 && (m_HookTick > ((SERVER_TICK_SPEED+SERVER_TICK_SPEED/5)*(1.0f+(skills?(skills[PUP_HOOKDUR]/2.0f):0.0f))) || !m_pWorld->m_apCharacters[m_HookedPlayer]))
 		{
 			m_HookedPlayer = -1;
 			m_HookState = HOOK_RETRACTED;

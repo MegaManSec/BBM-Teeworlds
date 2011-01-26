@@ -3,6 +3,17 @@
 #ifndef GAME_COLLISION_H
 #define GAME_COLLISION_H
 
+#define PUP_JUMP 0
+#define PUP_HAMMER 1
+#define PUP_LFREEZE 2
+#define PUP_SFREEZE 3
+#define PUP_HOOKDUR 4
+#define PUP_HOOKLEN 5
+#define PUP_WALKSPD 6
+#define PUP_EPICNINJA 7
+#define NUM_PUPS 8
+
+
 #include <base/vmath.h>
 
 class CCollision
@@ -13,9 +24,10 @@ class CCollision
 	class CLayers *m_pLayers;
 
 	bool IsTileSolid(int x, int y);
-	int GetTile(int x, int y);
-
+	int *dc;
+	int **dest;
 public:
+	int GetTile(int x, int y);
 	enum
 	{
 		COLFLAG_SOLID=1,
@@ -34,6 +46,8 @@ public:
 	void MovePoint(vec2 *pInoutPos, vec2 *pInoutVel, float Elasticity, int *Bpounces);
 	void MoveBox(vec2 *pInoutPos, vec2 *pInoutVel, vec2 Size, float Elasticity);
 	bool TestBox(vec2 Pos, vec2 Size);
+	vec2 GetTeleDest(int tind);
+	vec2 boost_accel(int index);
 };
 
 #endif

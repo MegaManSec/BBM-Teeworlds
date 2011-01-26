@@ -9,6 +9,16 @@
 
 #include <game/gamecore.h>
 
+#define REFREEZE_INTERVAL_TICKS (Server()->TickSpeed()>>1)
+
+#define COL_BLUE 0x90ff4d
+#define COL_GREEN 0x51ff4d
+#define COL_WHITE 0xffffff
+#define COL_GREY 0x1
+#define COL_RED 0xff00
+#define COL_YELLOW 0x2bff00
+#define COL_PINK 0xd6ff5b
+
 enum
 {
 	WEAPON_GAME = -3, // team switching etc
@@ -62,7 +72,12 @@ public:
 	bool IsAlive() const { return m_Alive; }
 	class CPlayer *GetPlayer() { return m_pPlayer; }
 	
+	bool Freeze(int time);
+	bool Unfreeze();
+
 private:
+	void tell_powerup_info(int client_id, int skill);
+
 	// player controlling this character
 	class CPlayer *m_pPlayer;
 	
@@ -110,6 +125,22 @@ private:
 
 	int m_Health;
 	int m_Armor;
+
+	int frz_time;//will be higher when blocker has lfreeze, for instance
+	int frz_tick;//will get updated on every REFREEZE_INTERVAL ticks
+	int frz_start;//will be set on the first freeze
+
+	int lastcolfrz;
+	int lastloadsave;
+	int lasthammeredby, lasthammeredat;
+	int lasthookedby, lasthookedat;
+	int lastup;
+	int wasout;
+	int lastepicninja;
+	int epicninjaannounced;
+	int blockedby;
+	int blocktime;
+	vec2 epicninjaoldpos;
 
 	// ninja
 	struct

@@ -27,11 +27,30 @@ void CCollision::Init(class CLayers *pLayers)
 	m_Height = m_pLayers->GameLayer()->m_Height;
 	m_pTiles = static_cast<CTile *>(m_pLayers->Map()->GetData(m_pLayers->GameLayer()->m_Data));
 	
+	int tpnum=(TILE_TPORT_LAST-TILE_TPORT_FIRST+1)>>1;
+	int *destcount=(int*)malloc(sizeof(int)*tpnum);
+	dc=(int*)malloc(sizeof(int)*tpnum);
+	dest=(int**)malloc(sizeof(int*)*tpnum);
+	for(int z=0;z<tpnum;++z) destcount[z]=dc[z]=0;
+	for(int i = 0; i < m_Width*m_Height; i++) //tport first
+	{
+		int index = m_pTiles[i].m_Index;
+		if(index >= TILE_TPORT_FIRST && index <= TILE_TPORT_LAST && !(index&1)) {
+			int tind = ((index-TILE_TPORT_FIRST) >> 1);
+			destcount[tind]++;dc[tind]++;
+		}
+	}
+	for(int z=0;z<tpnum;++z) {
+		if (destcount[z]) {
+			dest[z]=(int*)malloc(sizeof(int)*destcount[z]);
+		}
+	}
+	
 	for(int i = 0; i < m_Width*m_Height; i++)
 	{
 		int Index = m_pTiles[i].m_Index;
 		
-		if(Index > 128)
+		if(Index > TILE_CUSTOM_END)
 			continue;
 		
 		switch(Index)
@@ -46,22 +65,50 @@ void CCollision::Init(class CLayers *pLayers)
 			m_pTiles[i].m_Index = COLFLAG_SOLID|COLFLAG_NOHOOK;
 			break;
 		default:
-			m_pTiles[i].m_Index = 0;
+			/*m_pTiles[i].m_Index = 0*/;
 		}
+
+		if(Index >= TILE_TPORT_FIRST && Index <= TILE_TPORT_LAST && !(Index&1)) {
+			int tind = ((Index-TILE_TPORT_FIRST) >> 1);
+			dest[tind][--destcount[tind]]=i;
+		} else if (Index >= TILE_CUSTOM_END)
+			m_pTiles[i].m_Index = 0;
 	}
+	free(destcount);
 }
 
 int CCollision::GetTile(int x, int y)
 {
-	int nx = clamp(x/32, 0, m_Width-1);
-	int ny = clamp(y/32, 0, m_Height-1);
+	int nx = clamp(x>>5, 0, m_Width-1);
+	int ny = clamp(y>>5, 0, m_Height-1);
 	
-	return m_pTiles[ny*m_Width+nx].m_Index > 128 ? 0 : m_pTiles[ny*m_Width+nx].m_Index;
+	return m_pTiles[ny*m_Width+nx].m_Index > TILE_CUSTOM_END ? 0 : m_pTiles[ny*m_Width+nx].m_Index;
 }
 
 bool CCollision::IsTileSolid(int x, int y)
 {
-	return GetTile(x,y)&COLFLAG_SOLID;
+	int i = GetTile(x,y);
+	return (i<=5) && (i&COLFLAG_SOLID);
+}
+
+vec2 CCollision::GetTeleDest(int tind)
+{
+	if (dc[tind]) {
+		int r = rand() % dc[tind];
+		int x = (dest[tind][r] % m_Width) << 5;
+		int y = (dest[tind][r] / m_Width) << 5;
+		return vec2((float)x + 16.0, (float)y + 16.0);
+	} else return vec2(0, 0);
+}
+
+vec2 CCollision::boost_accel(int index)
+{
+	if (index == TILE_BOOST_L) return vec2(-15, 0);
+	else if (index == TILE_BOOST_R) return vec2(15, 0);
+	else if (index == TILE_BOOST_D) return vec2(0, 15);
+	else if (index == TILE_BOOST_U) return vec2(0, -15);
+
+	return vec2(0, 0);
 }
 
 // TODO: rewrite this smarter!

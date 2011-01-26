@@ -756,9 +756,18 @@ void CGameContext::OnMessage(int MsgId, CUnpacker *pUnpacker, int ClientId)
 			
 		p->m_Last_ChangeInfo = Server()->Tick();
 		
-		p->m_TeeInfos.m_UseCustomColor = pMsg->m_UseCustomColor;
-		p->m_TeeInfos.m_ColorBody = pMsg->m_ColorBody;
-		p->m_TeeInfos.m_ColorFeet = pMsg->m_ColorFeet;
+		if (!p->forcecolor) {
+		       p->origusecustcolor=pMsg->m_UseCustomColor;
+		       p->origbodycolor=pMsg->m_ColorBody;
+		       p->origfeetcolor=pMsg->m_ColorFeet;
+		}
+		p->m_TeeInfos.m_UseCustomColor = (p->forcecolor)?1:pMsg->m_UseCustomColor;
+		p->m_TeeInfos.m_ColorBody = (p->forcecolor)?p->forcecolor:pMsg->m_ColorBody;
+		p->m_TeeInfos.m_ColorFeet = (p->forcecolor)?p->forcecolor:pMsg->m_ColorFeet;
+
+//		p->m_TeeInfos.m_UseCustomColor = pMsg->m_UseCustomColor;
+//		p->m_TeeInfos.m_ColorBody = pMsg->m_ColorBody;
+//		p->m_TeeInfos.m_ColorFeet = pMsg->m_ColorFeet;
 
 		// copy old name
 		char aOldName[MAX_NAME_LENGTH];

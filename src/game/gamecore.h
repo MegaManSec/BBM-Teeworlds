@@ -194,6 +194,13 @@ public:
 	
 	int m_TriggeredEvents;
 	
+	int ldir;
+	int forceupdate;
+	int fuc;
+	int *skills;
+	int extrajumpsleft;
+
+
 	void Init(CWorldCore *pWorld, CCollision *pCollision);
 	void Reset();
 	void Tick(bool UseInput);
