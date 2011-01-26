@@ -64,8 +64,8 @@ bool CCharacter::Spawn(CPlayer *pPlayer, vec2 Pos)
 	m_PlayerState = PLAYERSTATE_UNKNOWN;
 	m_EmoteStop = -1;
 	m_LastAction = -1;
-	m_ActiveWeapon = WEAPON_HAMMER;
-	m_LastWeapon = WEAPON_GUN;
+	m_ActiveWeapon = WEAPON_GUN;
+	m_LastWeapon = WEAPON_HAMMER;
 	m_QueuedWeapon = -1;
 	
 	m_pPlayer = pPlayer;
@@ -323,24 +323,24 @@ void CCharacter::FireWeapon()
 				CCharacter *pTarget = apEnts[i];
 				
 				//for race mod or any other mod, which needs hammer hits through the wall remove second condition
-				if ((Target == this) /* || GameServer()->Collision()->IntersectLine(ProjStartPos, Target->m_Pos, NULL, NULL) */)
+				if ((pTarget == this) /* || GameServer()->Collision()->IntersectLine(ProjStartPos, Target->m_Pos, NULL, NULL) */)
 					continue;
 
 				// set his velocity to fast upward (for now)
 				GameServer()->CreateHammerHit(m_Pos);
 				//aEnts[i]->TakeDamage(vec2(0.f, -1.f), g_pData->m_Weapons.m_Hammer.m_pBase->m_Damage, m_pPlayer->GetCID(), m_ActiveWeapon);
 				
-				aEnts[i]->TakeDamage(vec2(0.f,-1.f),0,m_pPlayer->GetCID(),m_ActiveWeapon);
-				aEnts[i]->lasthammeredat = Server()->Tick();
-				aEnts[i]->lasthammeredby = m_pPlayer->GetCID();
+				apEnts[i]->TakeDamage(vec2(0.f,-1.f),0,m_pPlayer->GetCID(),m_ActiveWeapon);
+				apEnts[i]->lasthammeredat = Server()->Tick();
+				apEnts[i]->lasthammeredby = m_pPlayer->GetCID();
+				
 				vec2 Dir;
 				if (length(pTarget->m_Pos - m_Pos) > 0.0f)
 					Dir = normalize(pTarget->m_Pos - m_Pos);
 				else
 					Dir = vec2(0.f, -1.f);
-					
-				Target->m_Core.m_Vel += normalize(Dir + vec2(0.f, -1.1f)) * (10.0f + (m_pPlayer->skills[PUP_HAMMER] * 3));
-				Target->Unfreeze();
+				pTarget->m_Core.m_Vel += normalize(Dir + vec2(0.f, -1.1f)) * (10.0f + (m_pPlayer->skills[PUP_HAMMER] * 3));
+				pTarget->Unfreeze();
 				Hits++;
 			}
 			
@@ -604,7 +604,7 @@ void CCharacter::Tick()
 	m_Core.m_Input = m_Input;
 	m_Core.Tick(true);
 	
-<<<<<<< HEAD
+
        if (m_Core.m_HookedPlayer >= 0) {
                if (GameServer()->m_apPlayers[m_Core.m_HookedPlayer] && GameServer()->m_apPlayers[m_Core.m_HookedPlayer]->GetCharacter()) {
                        GameServer()->m_apPlayers[m_Core.m_HookedPlayer]->GetCharacter()->lasthookedat = Server()->Tick();
@@ -781,14 +781,6 @@ void CCharacter::Tick()
 	// kill player when leaving gamelayer
 	if((int)m_Pos.x/32 < -200 || (int)m_Pos.x/32 > GameServer()->Collision()->GetWidth()+200 ||
 		(int)m_Pos.y/32 < -200 || (int)m_Pos.y/32 > GameServer()->Collision()->GetHeight()+200)
-=======
-	// handle death-tiles and leaving gamelayer
-	if(GameServer()->Collision()->GetCollisionAt(m_Pos.x+m_ProximityRadius/3.f, m_Pos.y-m_ProximityRadius/3.f)&CCollision::COLFLAG_DEATH ||
-		GameServer()->Collision()->GetCollisionAt(m_Pos.x+m_ProximityRadius/3.f, m_Pos.y+m_ProximityRadius/3.f)&CCollision::COLFLAG_DEATH ||
-		GameServer()->Collision()->GetCollisionAt(m_Pos.x-m_ProximityRadius/3.f, m_Pos.y-m_ProximityRadius/3.f)&CCollision::COLFLAG_DEATH ||
-		GameServer()->Collision()->GetCollisionAt(m_Pos.x-m_ProximityRadius/3.f, m_Pos.y+m_ProximityRadius/3.f)&CCollision::COLFLAG_DEATH ||
-		GameLayerClipped(m_Pos))
->>>>>>> fa2cd8233507c4d614a0a6f5d1de80701a14cdcd
 	{
 		Die(m_pPlayer->GetCID(), WEAPON_WORLD);
 	}
