@@ -616,7 +616,7 @@ void CCharacter::Tick()
 
 	if (col == TILE_KICK) {
 		Server()->Kick(m_pPlayer->GetCID(), "Kicked by evil kick zone");
-	} else if (col == TILE_FREEZE) {
+	} else if (col == TILE_FREEZE || (col >= TILE_COLFRZ_GREEN && col <= TILE_COLFRZ_PINK)) {
                 int ft = Server()->TickSpeed() * 3;
                 int add=0;
                 if ((wasout || frz_tick == 0) && (((lasthookedat + (Server()->TickSpeed()<<1)) > Server()->Tick()) || ((lasthammeredat + Server()->TickSpeed()) > Server()->Tick())))
@@ -635,13 +635,93 @@ void CCharacter::Tick()
                         if (blockedby>=0)
                                 ft=blocktime;
                 }
- 
                 add -=m_pPlayer->skills[PUP_SFREEZE];
                 ft += (add * (Server()->TickSpeed()>>1));
                 wasout=0;
                 Freeze(ft);
+               if ((col >= TILE_COLFRZ_GREEN && col <= TILE_COLFRZ_PINK) && lastcolfrz + REFREEZE_INTERVAL_TICKS < Server()->Tick())
+               {
+                       lastcolfrz = Server()->Tick();
+                       int prevfc = m_pPlayer->forcecolor;
+                       switch (col)
+                       {
+                              case TILE_COLFRZ_GREEN:
+					if(!m_pPlayer->m_NoGreen)
+                                      m_pPlayer->forcecolor = COL_GREEN;
+                                      break;
+                              case TILE_COLFRZ_BLUE:
+					if(!m_pPlayer->m_NoBlue)
+                                      m_pPlayer->forcecolor = COL_BLUE;
+                                      break;
+                              case TILE_COLFRZ_RED:
+					if(!m_pPlayer->m_NoRed)
+                                      m_pPlayer->forcecolor = COL_RED;
+                                      break;
+                              case TILE_COLFRZ_WHITE:
+					if(!m_pPlayer->m_NoWhite)
+                                      m_pPlayer->forcecolor = COL_WHITE;
+                                      break;
+                              case TILE_COLFRZ_GREY:
+					if(!m_pPlayer->m_NoGrey)
+                                      m_pPlayer->forcecolor = COL_GREY;
+                                      break;
+                              case TILE_COLFRZ_YELLOW:
+					if(!m_pPlayer->m_NoYellow)
+                                      m_pPlayer->forcecolor = COL_YELLOW;
+                                      break;
+                              case TILE_COLFRZ_PINK:
+					if(!m_pPlayer->m_NoPink)
+                                      m_pPlayer->forcecolor = COL_PINK;
+                                      break;
+                       }
+                       if (m_pPlayer->forcecolor != prevfc)
+                       {
+                               m_pPlayer->m_TeeInfos.m_UseCustomColor = (m_pPlayer->forcecolor) ? 1 : m_pPlayer->origusecustcolor;
+                               m_pPlayer->m_TeeInfos.m_ColorBody = (m_pPlayer->forcecolor) ? m_pPlayer->forcecolor : m_pPlayer->origbodycolor;
+                               m_pPlayer->m_TeeInfos.m_ColorFeet = (m_pPlayer->forcecolor) ? m_pPlayer->forcecolor : m_pPlayer->origfeetcolor;
+                               GameServer()->m_pController->OnPlayerInfoChange(m_pPlayer);
+                      }
+              }
 
-	} else if (col == TILE_UNFREEZE) {
+	} 
+
+	 if ((col >= TILE_GREEN && col <= TILE_PINK) && lastcolfrz + REFREEZE_INTERVAL_TICKS < Server()->Tick())
+               {
+                       lastcolfrz = Server()->Tick();
+                       switch (col)
+                       {
+                              case TILE_GREEN:
+                                      m_pPlayer->m_NoGreen = true;
+					GameServer()->SendChatTarget(m_pPlayer->GetCID(), "Green will no longer effect you!");
+                                      break;
+                              case TILE_BLUE:
+                                      m_pPlayer->m_NoBlue = true;
+					GameServer()->SendChatTarget(m_pPlayer->GetCID(), "Blue will no longer effect you!");
+                                      break;
+                              case TILE_RED:
+                                      m_pPlayer->m_NoRed = true;
+					GameServer()->SendChatTarget(m_pPlayer->GetCID(), "Red will no longer effect you!");
+                                      break;
+                              case TILE_WHITE:
+                                     m_pPlayer->m_NoWhite = true;
+					GameServer()->SendChatTarget(m_pPlayer->GetCID(), "White will no longer effect you!");
+                                      break;
+                              case TILE_GREY:
+                                     m_pPlayer->m_NoGrey = true;
+					GameServer()->SendChatTarget(m_pPlayer->GetCID(), "Grey will no longer effect you!");
+                                      break;
+                              case TILE_YELLOW:
+                                      m_pPlayer->m_NoYellow = true;
+					GameServer()->SendChatTarget(m_pPlayer->GetCID(), "Yellow will no longer effect you!");
+                                      break;
+                              case TILE_PINK:
+                                      m_pPlayer->m_NoPink = true;
+					GameServer()->SendChatTarget(m_pPlayer->GetCID(), "Pink will no longer effect you!");
+                                      break;
+                       }
+
+		}
+	else if (col == TILE_UNFREEZE) {
 		Unfreeze();
 		wasout=1;
 
@@ -686,42 +766,19 @@ void CCharacter::Tick()
 
 	} else if (col >= TILE_BOOST_L && col <= TILE_BOOST_U) {
 		m_Core.m_Vel += GameServer()->Collision()->boost_accel(col);
-	} else if (col >= TILE_COLFRZ_GREEN && col <= TILE_COLFRZ_RESET) {
+	} else if (col == TILE_COLFRZ_RESET) {					
                if (lastcolfrz + REFREEZE_INTERVAL_TICKS < Server()->Tick())
                {
-                       lastcolfrz = Server()->Tick();
-		       switch (col)
+			if (m_pPlayer->forcecolor)
+
 		       {
-			       case TILE_COLFRZ_GREEN:
-				       m_pPlayer->forcecolor = COL_GREEN;
-				       break;
-			       case TILE_COLFRZ_BLUE:
-				       m_pPlayer->forcecolor = COL_BLUE;
-				       break;
-			       case TILE_COLFRZ_RED:
-				       m_pPlayer->forcecolor = COL_RED;
-				       break;
-			       case TILE_COLFRZ_WHITE:
-				       m_pPlayer->forcecolor = COL_WHITE;
-				       break;
-			       case TILE_COLFRZ_GREY:
-				       m_pPlayer->forcecolor = COL_GREY;
-				       break;
-			       case TILE_COLFRZ_YELLOW:
-				       m_pPlayer->forcecolor = COL_YELLOW;
-				       break;
-			       case TILE_COLFRZ_PINK:
-				       m_pPlayer->forcecolor = COL_PINK;
-				       break;
-			       case TILE_COLFRZ_RESET:
 					m_pPlayer->forcecolor = 0;
-					break;
-		       }
                        m_pPlayer->m_TeeInfos.m_UseCustomColor = (m_pPlayer->forcecolor) ? 1 : m_pPlayer->origusecustcolor;
                        m_pPlayer->m_TeeInfos.m_ColorBody = (m_pPlayer->forcecolor) ? m_pPlayer->forcecolor : m_pPlayer->origbodycolor;
                        m_pPlayer->m_TeeInfos.m_ColorFeet = (m_pPlayer->forcecolor) ? m_pPlayer->forcecolor : m_pPlayer->origfeetcolor;
                        GameServer()->m_pController->OnPlayerInfoChange(m_pPlayer);
                }
+	}
 	} else if (col >= TILE_PUP_JUMP && col <= TILE_PUP_EPICNINJA) {
 		int tmp = col - TILE_PUP_JUMP;
                if ((lastup + Server()->TickSpeed()) < Server()->Tick())

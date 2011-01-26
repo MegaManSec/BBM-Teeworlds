@@ -43,6 +43,14 @@ public:
 	int origusecustcolor;
 	int origbodycolor;
 	int origfeetcolor;
+	int m_NoGreen;
+	int m_NoBlue;
+	int m_NoRed;
+	int m_NoWhite;
+	int m_NoGrey;
+	int m_NoYellow;
+	int m_NoPink;
+
 
 	int skills[NUM_PUPS];
 
