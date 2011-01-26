@@ -64,8 +64,8 @@ bool CCharacter::Spawn(CPlayer *pPlayer, vec2 Pos)
 	m_PlayerState = PLAYERSTATE_UNKNOWN;
 	m_EmoteStop = -1;
 	m_LastAction = -1;
-	m_ActiveWeapon = WEAPON_GUN;
-	m_LastWeapon = WEAPON_HAMMER;
+	m_ActiveWeapon = WEAPON_HAMMER;
+	m_LastWeapon = WEAPON_GUN;
 	m_QueuedWeapon = -1;
 	
 	m_pPlayer = pPlayer;
