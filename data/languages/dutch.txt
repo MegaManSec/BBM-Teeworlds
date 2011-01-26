@@ -76,6 +76,12 @@ As this is the first time you launch the game, please enter your nick name below
 Aspect ratio
 == Beeldverhouding
 
+Automatically record demos
+== Automatisch demo's opnemen
+
+Automatically take game over screenshot
+== Automatisch schermafbeeldingen nemen
+
 Blue team
 == Blauwe team
 
@@ -448,6 +454,12 @@ Make external
 Map
 == Kaart
 
+Max Screenshots
+== Maximaal aantal schermafbeeldingen
+
+Max demos
+== Maximaal aantal demo's
+
 Maximum ping:
 == Hoogste ping:
 
@@ -467,7 +479,7 @@ Movement
 == Bewegen
 
 Mute when not active
-== Demp, waneer niet actief
+== Dempen wanneer inactief
 
 Name
 == Naam
@@ -596,7 +608,7 @@ Quick search:
 == Snel zoeken:
 
 Quit
-== Stoppen
+== Afsluiten
 
 REC
 == REC
@@ -707,7 +719,7 @@ Scoreboard
 == Scorebord
 
 Screenshot
-== Screenshot
+== Schermafbeelding
 
 Select group. Right click for properties.
 == Kies een groep. Rechtermuisknop voor eigenschappen.
@@ -931,36 +943,33 @@ ZO
 [ctrl+p] Toggles proof borders. These borders represent what a player maximum can see.
 == [ctrl+p] Test grenzen. Deze grenzen laten zien wat een speler maximaal kan zien.
 
+no limit
+== ongelimiteerd
+
 ##### needs translation #####
 
-Automatically record demos
+%i minute left
 == 
 
-Automatically take game over screenshot
+%i minutes left
 == 
 
-Max Screenshots
+%i second left
 == 
 
-Max demos
+%i seconds left
 == 
 
-left
+Name plates size
 == 
 
-minute
+Sound error
 == 
 
-minutes
+The audio device couldn't be initialised.
 == 
 
-no limit
-== 
-
-second
-== 
-
-seconds
+Unable to delete the demo
 == 
 
 ##### old translations #####

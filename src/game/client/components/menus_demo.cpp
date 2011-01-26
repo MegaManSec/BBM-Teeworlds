@@ -130,8 +130,9 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 
 	if(CurrentTick == TotalTicks)
 	{
-	DemoPlayer()->Pause();
-	DemoPlayer()->SetPos(0);
+		m_pClient->OnReset();
+		DemoPlayer()->Pause();
+		DemoPlayer()->SetPos(0);
 	}
 
 	if(m_MenuActive)
@@ -160,6 +161,7 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 		static int s_ResetButton = 0;
 		if(DoButton_DemoPlayer_Sprite(&s_ResetButton, SPRITE_DEMOBUTTON_STOP, false, &Button))
 		{
+			m_pClient->OnReset();
 			DemoPlayer()->Pause(); 
 			DemoPlayer()->SetPos(0);
 		}
@@ -279,9 +281,9 @@ void CMenus::UiDoListboxStart(void *pId, const CUIRect *pRect, float RowHeight, 
 	if(Num > 0)
 	{
 		if(Input()->KeyPresses(KEY_MOUSE_WHEEL_UP))
-			gs_ListBoxScrollValue -= 1.0f/Num;
+			gs_ListBoxScrollValue -= 3.0f/Num;
 		if(Input()->KeyPresses(KEY_MOUSE_WHEEL_DOWN))
-			gs_ListBoxScrollValue += 1.0f/Num;
+			gs_ListBoxScrollValue += 3.0f/Num;
 		
 		if(gs_ListBoxScrollValue < 0.0f) gs_ListBoxScrollValue = 0.0f;
 		if(gs_ListBoxScrollValue > 1.0f) gs_ListBoxScrollValue = 1.0f;
@@ -304,7 +306,7 @@ CMenus::CListboxItem CMenus::UiDoListboxNextRow()
 	if(gs_ListBoxItemIndex%gs_ListBoxItemsPerRow == 0)
 		gs_ListBoxView.HSplitTop(gs_ListBoxRowHeight /*-2.0f*/, &s_RowView, &gs_ListBoxView);
 
-	s_RowView.VSplitLeft(s_RowView.w/(gs_ListBoxItemsPerRow-gs_ListBoxItemIndex%gs_ListBoxItemsPerRow), &Item.m_Rect, &s_RowView);
+	s_RowView.VSplitLeft(s_RowView.w/(gs_ListBoxItemsPerRow-gs_ListBoxItemIndex%gs_ListBoxItemsPerRow)/(UI()->Scale()), &Item.m_Rect, &s_RowView);
 
 	Item.m_Visible = 1;
 	//item.rect = row;
@@ -475,22 +477,6 @@ void CMenus::RenderDemoList(CUIRect MainView)
 		DemolistPopulate();
 		DemolistOnUpdate(true);
 		s_Inited = 1;
-	}
-
-	// delete demo
-	if(m_DemolistDelEntry)
-	{
-		if(m_DemolistSelectedIndex >= 0 && !m_DemolistSelectedIsDir)
-		{
-			char aBuf[512];
-			str_format(aBuf, sizeof(aBuf), "%s/%s", m_aCurrentDemoFolder, m_lDemos[m_DemolistSelectedIndex].m_aFilename);
-			if(Storage()->RemoveFile(aBuf, m_lDemos[m_DemolistSelectedIndex].m_StorageType))
-			{
-				DemolistPopulate();
-				DemolistOnUpdate(false);
-			}
-		}
-		m_DemolistDelEntry = false;
 	}
 
 	char aFooterLabel[128] = {0};

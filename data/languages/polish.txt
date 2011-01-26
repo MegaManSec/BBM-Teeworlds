@@ -783,6 +783,18 @@ ZO
 %d%% loaded
 == 
 
+%i minute left
+== 
+
+%i minutes left
+== 
+
+%i second left
+== 
+
+%i seconds left
+== 
+
 Alpha value of the envelope
 == 
 
@@ -864,6 +876,9 @@ Max Screenshots
 Max demos
 == 
 
+Name plates size
+== 
+
 New folder
 == 
 
@@ -915,13 +930,22 @@ Rotation of the envelope
 Shift
 == 
 
+Sound error
+== 
+
 Stop record
+== 
+
+The audio device couldn't be initialised.
 == 
 
 Tiles
 == 
 
 Time limit: %d min
+== 
+
+Unable to delete the demo
 == 
 
 Up
@@ -945,22 +969,7 @@ Y-axis of the envelope
 [HOME] Restore map focus
 == 
 
-left
-== 
-
-minute
-== 
-
-minutes
-== 
-
 no limit
-== 
-
-second
-== 
-
-seconds
 == 
 
 ##### old translations #####

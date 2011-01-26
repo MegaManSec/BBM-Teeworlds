@@ -192,7 +192,9 @@ void CGameClient::OnConsoleInit()
 	Console()->Register("broadcast", "r", CFGFLAG_SERVER, 0, 0, "Broadcast message");
 	Console()->Register("say", "r", CFGFLAG_SERVER, 0, 0, "Say in chat");
 	Console()->Register("set_team", "ii", CFGFLAG_SERVER, 0, 0, "Set team of player to team");
+	Console()->Register("set_team_all", "i", CFGFLAG_SERVER, 0, 0, "Set team of all players to team");
 	Console()->Register("addvote", "r", CFGFLAG_SERVER, 0, 0, "Add a voting option");
+	Console()->Register("clear_votes", "", CFGFLAG_SERVER, 0, 0, "Clears the voting options");
 	Console()->Register("vote", "r", CFGFLAG_SERVER, 0, 0, "Force a vote to yes/no");
 
 
@@ -221,8 +223,6 @@ void CGameClient::OnConsoleInit()
 
 void CGameClient::OnInit()
 {
-	//m_pServerBrowser = Kernel()->RequestInterface<IServerBrowser>();
-	
 	// set the language
 	g_Localization.Load(g_Config.m_ClLanguagefile, Storage(), Console());
 	
@@ -237,15 +237,17 @@ void CGameClient::OnInit()
 	int64 Start = time_get();
 	
 	// load default font	
-	static CFont *pDefaultFont;
-	//default_font = gfx_font_load("data/fonts/sazanami-gothic.ttf");
-
+	static CFont *pDefaultFont = 0;
 	char aFilename[512];
 	IOHANDLE File = Storage()->OpenFile("fonts/DejaVuSans.ttf", IOFLAG_READ, IStorage::TYPE_ALL, aFilename, sizeof(aFilename));
 	if(File)
+	{
 		io_close(File);
-	pDefaultFont = TextRender()->LoadFont(aFilename);
-	TextRender()->SetDefaultFont(pDefaultFont);
+		pDefaultFont = TextRender()->LoadFont(aFilename);
+		TextRender()->SetDefaultFont(pDefaultFont);
+	}
+	if(!pDefaultFont)
+		Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "gameclient", "failed to load font. filename='fonts/DejaVuSans.ttf'");
 
 	g_Config.m_ClThreadsoundloading = 0;
 
@@ -263,8 +265,8 @@ void CGameClient::OnInit()
 		gs_LoadCurrent++;
 	}
 
+	// load skins
 	::gs_Skins.Init();
-	
 	
 	// TODO: Refactor: fix threaded loading of sounds again
 	// load sounds
@@ -276,8 +278,8 @@ void CGameClient::OnInit()
 				g_GameClient.m_pMenus->RenderLoading(gs_LoadCurrent/(float)gs_LoadTotal);
 			for(int i = 0; i < g_pData->m_aSounds[s].m_NumSounds; i++)
 			{
-				int id = Sound()->LoadWV(g_pData->m_aSounds[s].m_aSounds[i].m_pFilename);
-				g_pData->m_aSounds[s].m_aSounds[i].m_Id = id;
+				int Id = Sound()->LoadWV(g_pData->m_aSounds[s].m_aSounds[i].m_pFilename);
+				g_pData->m_aSounds[s].m_aSounds[i].m_Id = Id;
 			}
 
 			if(DoRender)
@@ -392,7 +394,7 @@ void CGameClient::UpdateLocalCharacterPos()
 {
 	if(g_Config.m_ClPredict && Client()->State() != IClient::STATE_DEMOPLAYBACK)
 	{
-		if(!m_Snap.m_pLocalCharacter || (m_Snap.m_pLocalCharacter->m_Health < 0) || (m_Snap.m_pGameobj && m_Snap.m_pGameobj->m_GameOver))
+		if(!m_Snap.m_pLocalCharacter || (m_Snap.m_pGameobj && m_Snap.m_pGameobj->m_GameOver))
 		{
 			// don't use predicted
 		}
@@ -590,6 +592,12 @@ void CGameClient::OnGameOver()
 		Client()->AutoScreenshot_Start();
 }
 
+void CGameClient::OnStartGame()
+{
+	if(Client()->State() != IClient::STATE_DEMOPLAYBACK)
+		Client()->DemoRecorder_HandleAutoStart();
+}
+
 void CGameClient::OnRconLine(const char *pLine)
 {
 	m_pGameConsole->PrintLine(CGameConsole::CONSOLETYPE_REMOTE, pLine);
@@ -689,7 +697,7 @@ void CGameClient::OnNewSnapshot()
 
 	// go trough all the items in the snapshot and gather the info we want
 	{
-		m_Snap.m_aTeamSize[0] = m_Snap.m_aTeamSize[1] = 0;
+		m_Snap.m_aTeamSize[TEAM_RED] = m_Snap.m_aTeamSize[TEAM_BLUE] = 0;
 		
 		int Num = Client()->SnapNumItems(IClient::SNAP_CURRENT);
 		for(int i = 0; i < Num; i++)
@@ -750,12 +758,12 @@ void CGameClient::OnNewSnapshot()
 					m_Snap.m_LocalCid = Item.m_Id;
 					m_Snap.m_pLocalInfo = pInfo;
 					
-					if (pInfo->m_Team == -1)
+					if(pInfo->m_Team == TEAM_SPECTATORS)
 						m_Snap.m_Spectate = true;
 				}
 				
 				// calculate team-balance
-				if(pInfo->m_Team != -1)
+				if(pInfo->m_Team != TEAM_SPECTATORS)
 					m_Snap.m_aTeamSize[pInfo->m_Team]++;
 				
 			}
@@ -780,6 +788,8 @@ void CGameClient::OnNewSnapshot()
 				m_Snap.m_pGameobj = (CNetObj_Game *)pData;
 				if(s_GameOver == 0 && m_Snap.m_pGameobj->m_GameOver != 0)
 					OnGameOver();
+				else if(s_GameOver != 0 && m_Snap.m_pGameobj->m_GameOver == 0)
+					OnStartGame();
 				s_GameOver = m_Snap.m_pGameobj->m_GameOver;
 			}
 			else if(Item.m_Type == NETOBJTYPE_FLAG)
@@ -805,6 +815,21 @@ void CGameClient::OnNewSnapshot()
 	}
 	else
 		m_Snap.m_Spectate = true;
+
+	// sort player infos by score
+	mem_copy(m_Snap.m_paInfoByScore, m_Snap.m_paPlayerInfos, sizeof(m_Snap.m_paInfoByScore));
+	for(int k = 0; k < MAX_CLIENTS-1; k++) // ffs, bubblesort
+	{
+		for(int i = 0; i < MAX_CLIENTS-k-1; i++)
+		{
+			if(m_Snap.m_paInfoByScore[i+1] && (!m_Snap.m_paInfoByScore[i] || m_Snap.m_paInfoByScore[i]->m_Score < m_Snap.m_paInfoByScore[i+1]->m_Score))
+			{
+				const CNetObj_PlayerInfo *pTmp = m_Snap.m_paInfoByScore[i];
+				m_Snap.m_paInfoByScore[i] = m_Snap.m_paInfoByScore[i+1];
+				m_Snap.m_paInfoByScore[i+1] = pTmp;
+			}
+		}
+	}
 	
 	CTuningParams StandardTuning;
 	CServerInfo CurrentServerInfo;
@@ -947,6 +972,11 @@ void CGameClient::OnPredict()
 	m_PredictedTick = Client()->PredGameTick();
 }
 
+void CGameClient::OnActivateEditor()
+{
+	OnRelease();
+}
+
 void CGameClient::CClientData::UpdateRenderInfo()
 {
 	m_RenderInfo = m_SkinInfo;
@@ -955,7 +985,7 @@ void CGameClient::CClientData::UpdateRenderInfo()
 	if(g_GameClient.m_Snap.m_pGameobj && g_GameClient.m_Snap.m_pGameobj->m_Flags&GAMEFLAG_TEAMS)
 	{
 		const int TeamColors[2] = {65387, 10223467};
-		if(m_Team >= 0 && m_Team <= 1)
+		if(m_Team >= TEAM_RED && m_Team <= TEAM_BLUE)
 		{
 			m_RenderInfo.m_Texture = g_GameClient.m_pSkins->Get(m_SkinId)->m_ColorTexture;
 			m_RenderInfo.m_ColorBody = g_GameClient.m_pSkins->GetColorV4(TeamColors[m_Team]);

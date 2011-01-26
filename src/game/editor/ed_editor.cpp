@@ -1027,8 +1027,14 @@ void CEditor::DoQuadPoint(CQuad *q, int QuadIndex, int v)
 				for(int m = 0; m < 4; m++)
 					if(m_SelectedPoints&(1<<m))
 					{
+						// 0,2;1,3 - line x 
+						// 0,1;2,3 - line y
+
 						q->m_aTexcoords[m].x += f2fx(dx*0.001f);
+						q->m_aTexcoords[(m+2)%4].x += f2fx(dx*0.001f);
+						
 						q->m_aTexcoords[m].y += f2fx(dy*0.001f);
+						q->m_aTexcoords[m^1].y += f2fx(dy*0.001f);
 					}
 			}
 		}
@@ -1827,7 +1833,7 @@ void CEditor::RenderLayers(CUIRect ToolBox, CUIRect ToolBar, CUIRect View)
 					m_SelectedGroup = g;
 					static int s_LayerPopupId = 0;
 					if(Result == 2)
-						UiInvokePopupMenu(&s_LayerPopupId, 0, UI()->MouseX(), UI()->MouseY(), 120, 180, PopupLayer);
+						UiInvokePopupMenu(&s_LayerPopupId, 0, UI()->MouseX(), UI()->MouseY(), 120, 220, PopupLayer);
 				}
 
 				LayerCur += 14.0f;

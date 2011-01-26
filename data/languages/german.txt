@@ -10,6 +10,18 @@
 %ds left
 == Noch %ds
 
+%i minute left
+== Noch %i Minute
+
+%i minutes left
+== Noch %i Minuten
+
+%i second left
+== Noch %i Sekunde
+
+%i seconds left
+== Noch %i Sekunden
+
 %s Right click for context menu.
 == %s Rechtsklick für Kontextmenü.
 
@@ -75,6 +87,12 @@ As this is the first time you launch the game, please enter your nick name below
 
 Aspect ratio
 == Seitenverhältnis
+
+Automatically record demos
+== Automatisch Demos aufnehmen
+
+Automatically take game over screenshot
+== Bildschirmfotos autom. nach jeder Runde erstellen
 
 Blue team
 == Blaues Team
@@ -448,6 +466,12 @@ Make external
 Map
 == Karte
 
+Max Screenshots
+== Maximale Bildschirmfotos
+
+Max demos
+== Maximale Demos
+
 Maximum ping:
 == Maximaler Ping:
 
@@ -471,6 +495,9 @@ Mute when not active
 
 Name
 == Name
+
+Name plates size
+== Größe der Namen
 
 Name:
 == Name:
@@ -590,7 +617,7 @@ Quads
 == Vier.
 
 Quality Textures
-== Hochaufgelöste Texturen
+== Hochauflösende Texturen
 
 Quick search:
 == Schnellsuche:
@@ -751,6 +778,9 @@ Skins
 Sound
 == Ton
 
+Sound error
+== Audiofehler
+
 Sound volume
 == Lautstärke
 
@@ -799,6 +829,9 @@ Teeworlds %s is out! Download it at www.teeworlds.com!
 Texture Compression
 == Texturkompression
 
+The audio device couldn't be initialised.
+== Das Audiosystem konnte nicht gestartet werden.
+
 The server is running a non-standard tuning on a pure game type.
 == Der Server läuft nicht mit Standardeinstellungen.
 
@@ -828,6 +861,9 @@ Type
 
 UI Color
 == Menüfarbe
+
+Unable to delete the demo
+== Demo konnte nicht gelöscht werden
 
 Up
 == Oben
@@ -931,37 +967,10 @@ ZO
 [ctrl+p] Toggles proof borders. These borders represent what a player maximum can see.
 == [Strg+P] Schaltet Testrahmen um. Diese Rahmen zeigen, wie viel der Spieler höchstens sehen kann.
 
-##### needs translation #####
-
-Automatically record demos
-== 
-
-Automatically take game over screenshot
-== 
-
-Max Screenshots
-== 
-
-Max demos
-== 
-
-left
-== 
-
-minute
-== 
-
-minutes
-== 
-
 no limit
-== 
+== Keine Begrenzung
 
-second
-== 
-
-seconds
-== 
+##### needs translation #####
 
 ##### old translations #####
 

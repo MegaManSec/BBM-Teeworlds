@@ -414,6 +414,7 @@ CClient::CClient() : m_DemoPlayer(&m_SnapshotDelta), m_DemoRecorder(&m_SnapshotD
 	m_WindowMustRefocus = 0;
 	m_SnapCrcErrors = 0;
 	m_AutoScreenshotRecycle = false;
+	m_EditorActive = false;
 
 	m_AckGameTick = -1;
 	m_CurrentRecvTick = 0;
@@ -1461,11 +1462,11 @@ void CClient::ProcessPacket(CNetChunk *pPacket)
 						}
 
 						// adjust game time
+						if(m_RecivedSnapshots > 2)
 						{
 							int64 Now = m_GameTime.Get(time_get());
 							int64 TickStart = GameTick*time_freq()/50;
 							int64 TimeLeft = (TickStart-Now)*1000 / time_freq();
-							//st_update(&game_time, (game_tick-1)*time_freq()/50);
 							m_GameTime.Update(&m_GametimeMarginGraph, (GameTick-1)*time_freq()/50, TimeLeft, 0);
 						}
 
@@ -1802,13 +1803,11 @@ void CClient::Run()
 	m_pEditor->Init();
 
 	// init sound, allowed to fail
-	Sound()->Init();
+	m_SoundInitFailed = Sound()->Init() != 0;
 
 	// load data
 	if(!LoadData())
 		return;
-
-	DemoRecorder_Init();
 
 	GameClient()->OnInit();
 	char aBuf[256];
@@ -1916,12 +1915,21 @@ void CClient::Run()
 		// render
 		if(g_Config.m_ClEditor)
 		{
+			if(!m_EditorActive)
+			{
+				GameClient()->OnActivateEditor();
+				m_EditorActive = true;
+			}
+
 			Update();
 			m_pEditor->UpdateAndRender();
 			m_pGraphics->Swap();
 		}
 		else
 		{
+			if(m_EditorActive)
+				m_EditorActive = false;
+
 			Update();
 
 			if(g_Config.m_DbgStress)
@@ -2133,12 +2141,6 @@ void CClient::Con_Play(IConsole::IResult *pResult, void *pUserData)
 	pSelf->DemoPlayer_Play(pResult->GetString(0), IStorage::TYPE_ALL);
 }
 
-void CClient::DemoRecorder_Init()
-{
-	if(!Storage()->CreateFolder("demos/auto", IStorage::TYPE_SAVE))
-		m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "demorec/record", "unable to create auto record folder");
-}
-
 void CClient::DemoRecorder_Start(const char *pFilename, bool WithTimestamp)
 {
 	if(State() != IClient::STATE_ONLINE)
@@ -2162,6 +2164,7 @@ void CClient::DemoRecorder_HandleAutoStart()
 {
 	if(g_Config.m_ClAutoDemoRecord)
 	{
+		DemoRecorder_Stop();
 		DemoRecorder_Start("auto/autorecord", true);
 		if(g_Config.m_ClAutoDemoMax)
 		{

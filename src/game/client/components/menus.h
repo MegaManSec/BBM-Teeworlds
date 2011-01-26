@@ -81,7 +81,7 @@ class CMenus : public CComponent
 	void UiDoListboxStart(void *pId, const CUIRect *pRect, float RowHeight, const char *pTitle, const char *pBottomText, int NumItems,
 						  int ItemsPerRow, int SelectedIndex, float ScrollValue);
 	CListboxItem UiDoListboxNextItem(void *pID, bool Selected = false);
-	static CListboxItem UiDoListboxNextRow();
+	CListboxItem UiDoListboxNextRow();
 	int UiDoListboxEnd(float *pScrollValue, bool *pItemActivated);
 	
 	//static void demolist_listdir_callback(const char *name, int is_dir, void *user);
@@ -97,6 +97,7 @@ class CMenus : public CComponent
 		POPUP_PURE,
 		POPUP_LANGUAGE,
 		POPUP_DELETE_DEMO,
+		POPUP_SOUNDERROR,
 		POPUP_PASSWORD,
 		POPUP_QUIT, 
 	};
@@ -180,7 +181,6 @@ class CMenus : public CComponent
 	
 	sorted_array<CDemoItem> m_lDemos;
 	char m_aCurrentDemoFolder[256];
-	bool m_DemolistDelEntry;
 	int m_DemolistSelectedIndex;
 	bool m_DemolistSelectedIsDir;
 	int m_DemolistStorageType;

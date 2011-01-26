@@ -2,6 +2,7 @@
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #include <algorithm> // sort
 
+#include <base/math.h>
 #include <base/system.h>
 #include <engine/shared/network.h>
 #include <engine/shared/protocol.h>
@@ -440,9 +441,9 @@ void CServerBrowser::Set(const NETADDR &Addr, int Type, int Token, const CServer
 		{
 			SetInfo(pEntry, *pInfo);
 			if(m_ServerlistType == IServerBrowser::TYPE_LAN)
-				pEntry->m_Info.m_Latency = (time_get()-m_BroadcastTime)*1000/time_freq();
+				pEntry->m_Info.m_Latency = min(static_cast<int>((time_get()-m_BroadcastTime)*1000/time_freq()), 999);
 			else
-				pEntry->m_Info.m_Latency = (time_get()-pEntry->m_RequestTime)*1000/time_freq();
+				pEntry->m_Info.m_Latency = min(static_cast<int>((time_get()-pEntry->m_RequestTime)*1000/time_freq()), 999);
 			RemoveRequest(pEntry);
 		}
 	}
@@ -454,9 +455,9 @@ void CServerBrowser::Set(const NETADDR &Addr, int Type, int Token, const CServer
 			SetInfo(pEntry, *pInfo);
 
 			if(m_ServerlistType == IServerBrowser::TYPE_LAN)
-				pEntry->m_Info.m_Latency = (time_get()-m_BroadcastTime)*1000/time_freq();
+				pEntry->m_Info.m_Latency = min(static_cast<int>((time_get()-m_BroadcastTime)*1000/time_freq()), 999);
 			else
-				pEntry->m_Info.m_Latency = (time_get()-pEntry->m_RequestTime)*1000/time_freq();
+				pEntry->m_Info.m_Latency = min(static_cast<int>((time_get()-pEntry->m_RequestTime)*1000/time_freq()), 999);
 			RemoveRequest(pEntry);
 		}
 	}
@@ -530,7 +531,7 @@ void CServerBrowser::Refresh(int Type)
 
 void CServerBrowser::RequestImpl(const NETADDR &Addr, CServerEntry *pEntry) const
 {
-	//unsigned char buffer[sizeof(SERVERBROWSE_GETINFO)+1];
+	unsigned char Buffer[sizeof(SERVERBROWSE_GETINFO)+1];
 	CNetChunk Packet;
 
 	if(g_Config.m_Debug)
@@ -542,19 +543,15 @@ void CServerBrowser::RequestImpl(const NETADDR &Addr, CServerEntry *pEntry) cons
 		m_pConsole->Print(IConsole::OUTPUT_LEVEL_DEBUG, "client_srvbrowse", aBuf);
 	}
 
-	/*mem_copy(buffer, SERVERBROWSE_GETINFO, sizeof(SERVERBROWSE_GETINFO));
-	buffer[sizeof(SERVERBROWSE_GETINFO)] = current_token;*/
+	mem_copy(Buffer, SERVERBROWSE_GETINFO, sizeof(SERVERBROWSE_GETINFO));
+	Buffer[sizeof(SERVERBROWSE_GETINFO)] = m_CurrentToken;
 
 	Packet.m_ClientID = -1;
 	Packet.m_Address = Addr;
 	Packet.m_Flags = NETSENDFLAG_CONNLESS;
-	/*p.data_size = sizeof(buffer);
-	p.data = buffer;
-	netclient_send(net, &p);*/
-
-	// send old request style aswell
-	Packet.m_DataSize = sizeof(SERVERBROWSE_OLD_GETINFO);
-	Packet.m_pData = SERVERBROWSE_OLD_GETINFO;
+	Packet.m_DataSize = sizeof(Buffer);
+	Packet.m_pData = Buffer;
+	
 	m_pNetClient->Send(&Packet);
 
 	if(pEntry)

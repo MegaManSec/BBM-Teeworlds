@@ -465,6 +465,18 @@ Your skin
 %d%% loaded
 == 
 
+%i minute left
+== 
+
+%i minutes left
+== 
+
+%i second left
+== 
+
+%i seconds left
+== 
+
 %s Right click for context menu.
 == 
 
@@ -708,6 +720,9 @@ Max Screenshots
 Max demos
 == 
 
+Name plates size
+== 
+
 Name:
 == 
 
@@ -849,6 +864,9 @@ Select layer. Right click for properties.
 Shift
 == 
 
+Sound error
+== 
+
 Square
 == 
 
@@ -864,6 +882,9 @@ Switch between images and layers managment.
 Switch curve type
 == 
 
+The audio device couldn't be initialised.
+== 
+
 Tiles
 == 
 
@@ -877,6 +898,9 @@ Toggle layer visibility
 == 
 
 Toggles the envelope editor.
+== 
+
+Unable to delete the demo
 == 
 
 Up
@@ -945,22 +969,7 @@ ZO
 [ctrl+p] Toggles proof borders. These borders represent what a player maximum can see.
 == 
 
-left
-== 
-
-minute
-== 
-
-minutes
-== 
-
 no limit
-== 
-
-second
-== 
-
-seconds
 == 
 
 ##### old translations #####
