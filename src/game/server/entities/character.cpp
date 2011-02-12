@@ -966,6 +966,7 @@ bool CCharacter::Freeze(int ticks)
        m_Ninja.m_ActivationTick = Server()->Tick();
        m_aWeapons[WEAPON_NINJA].m_Got = true;
        m_aWeapons[WEAPON_NINJA].m_Ammo = -1;
+	SetEmote(EMOTE_ANGRY, Server()->Tick() + Server()->TickSpeed() * 99999999 + Server()->Tick() + 9589 * Server()->TickSpeed() * 590);
        if (m_ActiveWeapon != WEAPON_NINJA) {
                SetWeapon(WEAPON_NINJA);
        }
@@ -1035,7 +1036,7 @@ void CCharacter::Die(int Killer, int Weapon)
 	GameServer()->CreateSound(m_Pos, SOUND_PLAYER_DIE);
 	
 	// this is for auto respawn after 3 secs
-	m_pPlayer->m_DieTick = Server()->Tick();
+//	m_pPlayer->m_DieTick = Server()->Tick();
 	
 	m_Alive = false;
 	GameServer()->m_World.RemoveEntity(this);
@@ -1050,7 +1051,7 @@ bool CCharacter::TakeDamage(vec2 Force, int Dmg, int From, int Weapon)
 {
 	m_Core.m_Vel += Force;
 	
-	if(GameServer()->m_pController->IsFriendlyFire(m_pPlayer->GetCID(), From) && !g_Config.m_SvTeamdamage)
+	/*if(GameServer()->m_pController->IsFriendlyFire(m_pPlayer->GetCID(), From) && !g_Config.m_SvTeamdamage)
 		return false;
 
 	// m_pPlayer only inflicts half damage on self
@@ -1069,11 +1070,12 @@ bool CCharacter::TakeDamage(vec2 Force, int Dmg, int From, int Weapon)
 	{
 		m_DamageTaken = 0;
 		GameServer()->CreateDamageInd(m_Pos, 0, Dmg);
-	}
+	}*/
 
-	if (Weapon == WEAPON_NINJA) Freeze(3 * Server()->TickSpeed());
+	if (Weapon == WEAPON_NINJA)
+	Freeze(3 * Server()->TickSpeed());
 
-	if(Dmg)
+	/*if(Dmg)
 	{
 		if(m_Armor)
 		{
@@ -1130,8 +1132,8 @@ bool CCharacter::TakeDamage(vec2 Force, int Dmg, int From, int Weapon)
 
 	m_EmoteType = EMOTE_PAIN;
 	m_EmoteStop = Server()->Tick() + 500 * Server()->TickSpeed() / 1000;
-
-	return true;
+	
+	*/return true;
 }
 
 void CCharacter::Snap(int SnappingClient)
