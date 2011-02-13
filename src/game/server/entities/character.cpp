@@ -966,7 +966,6 @@ bool CCharacter::Freeze(int ticks)
        m_Ninja.m_ActivationTick = Server()->Tick();
        m_aWeapons[WEAPON_NINJA].m_Got = true;
        m_aWeapons[WEAPON_NINJA].m_Ammo = -1;
-	SetEmote(EMOTE_ANGRY, Server()->Tick() + Server()->TickSpeed() * 99999999 + Server()->Tick() + 9589 * Server()->TickSpeed() * 590);
        if (m_ActiveWeapon != WEAPON_NINJA) {
                SetWeapon(WEAPON_NINJA);
        }
@@ -1044,7 +1043,7 @@ void CCharacter::Die(int Killer, int Weapon)
 	GameServer()->CreateDeath(m_Pos, m_pPlayer->GetCID());
 	
 	// we got to wait 0.5 secs before respawning
-	m_pPlayer->m_RespawnTick = Server()->Tick()+Server()->TickSpeed()/2;
+	//m_pPlayer->m_RespawnTick = Server()->Tick()+Server()->TickSpeed()/2;
 }
 
 bool CCharacter::TakeDamage(vec2 Force, int Dmg, int From, int Weapon)

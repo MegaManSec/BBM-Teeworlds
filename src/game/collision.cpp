@@ -77,17 +77,17 @@ void CCollision::Init(class CLayers *pLayers)
 	free(destcount);
 }
 
-int CCollision::GetTile(int x, int y)
+int CCollision::GetTile(int X, int Y)
 {
-	int nx = clamp(x>>5, 0, m_Width-1);
-	int ny = clamp(y>>5, 0, m_Height-1);
+	int nx = clamp(X>>5, 0, m_Width-1);
+	int ny = clamp(Y>>5, 0, m_Height-1);
 	
 	return m_pTiles[ny*m_Width+nx].m_Index > TILE_CUSTOM_END ? 0 : m_pTiles[ny*m_Width+nx].m_Index;
 }
 
-bool CCollision::IsTileSolid(int x, int y)
+bool CCollision::IsTileSolid(int X, int Y)
 {
-	int i = GetTile(x,y);
+	int i = GetTile(X,Y);
 	return (i<=5) && (i&COLFLAG_SOLID);
 }
 
@@ -114,14 +114,14 @@ vec2 CCollision::boost_accel(int index)
 // TODO: rewrite this smarter!
 int CCollision::IntersectLine(vec2 Pos0, vec2 Pos1, vec2 *pOutCollision, vec2 *pOutBeforeCollision)
 {
-	float d = distance(Pos0, Pos1);
-	int End(d+1);
+	float D = distance(Pos0, Pos1);
+	int End(D+1);
 	vec2 Last = Pos0;
 	
 	for(int i = 0; i < End; i++)
 	{
-		float a = i/d;
-		vec2 Pos = mix(Pos0, Pos1, a);
+		float A = i/D;
+		vec2 Pos = mix(Pos0, Pos1, A);
 		if(CheckPoint(Pos.x, Pos.y))
 		{
 			if(pOutCollision)

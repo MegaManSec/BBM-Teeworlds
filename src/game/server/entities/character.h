@@ -71,9 +71,11 @@ public:
 	
 	bool IsAlive() const { return m_Alive; }
 	class CPlayer *GetPlayer() { return m_pPlayer; }
+	void SetEmoteStop(int EmoteStop) { m_EmoteStop = EmoteStop; };
 	
 	bool Freeze(int time);
 	bool Unfreeze();
+	void SetEmoteType(int EmoteType) { m_EmoteType = EmoteType; };
 
 private:
 	void tell_powerup_info(int client_id, int skill);
@@ -82,7 +84,8 @@ private:
 	class CPlayer *m_pPlayer;
 	
 	bool m_Alive;
-
+	int m_EmoteType;
+	int m_EmoteStop;
 	// weapon info
 	CEntity *m_apHitObjects[10];
 	int m_NumObjectsHit;
@@ -93,7 +96,7 @@ private:
 		int m_Ammo;
 		int m_Ammocost;
 		bool m_Got;
-		
+
 	} m_aWeapons[NUM_WEAPONS];
 	
 	int m_ActiveWeapon;
@@ -105,8 +108,6 @@ private:
 	
 	int m_DamageTaken;
 
-	int m_EmoteType;
-	int m_EmoteStop;
 	
 	// last tick that the player took any action ie some input
 	int m_LastAction;
