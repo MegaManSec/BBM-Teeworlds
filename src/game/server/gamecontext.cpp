@@ -624,6 +624,10 @@ else if(!str_comp_nocase(pMsg->m_pMessage, "/emote"))
                 {
                        SendChatTarget(ClientID, "Emotes are as followed: /normal /surprise /happy /pain /blink /angry and /close");
                 }
+else if(!str_comp_nocase(pMsg->m_pMessage, "/info"))
+                {
+                       SendChatTarget(ClientID, "/powerups to display your powerups - and also emotes! type /emote");
+                }
 else if(!str_comp_nocase(pMsg->m_pMessage, "/powerups"))
                 {
 		SendChatTarget(ClientID, "********Powerups*********");
