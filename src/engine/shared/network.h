@@ -215,13 +215,18 @@ public:
 class CNetServer
 {
 public:
+	enum
+	{
+		MAX_BANMASTERS=16,
+		NETSERVER_DISABLEBANMASTER=1,
+	};
 	struct CBanInfo
 	{
 		NETADDR m_Addr;
 		int m_Expires;
 		char m_Reason[128];
 	};
-	
+
 private:
 	class CSlot
 	{
@@ -254,9 +259,14 @@ private:
 	CBan *m_BanPool_FirstFree;
 	CBan *m_BanPool_FirstUsed;
 
+	NETADDR m_aBanmasters[MAX_BANMASTERS];
+	int m_NumBanmasters;
+	
 	NETFUNC_NEWCLIENT m_pfnNewClient;
 	NETFUNC_DELCLIENT m_pfnDelClient;
 	void *m_UserPtr;
+	
+	int m_Flags;
 	
 	CNetRecvUnpacker m_RecvUnpacker;
 	
@@ -290,6 +300,11 @@ public:
 
 	//
 	void SetMaxClientsPerIP(int Max);
+	int BanmasterAdd(const char *pAddrStr);
+	int BanmasterNum() const;
+	NETADDR* BanmasterGet(int Index);
+	int BanmasterCheck(NETADDR *pAddr);
+	void BanmastersClear();
 };
 
 
