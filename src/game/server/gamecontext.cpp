@@ -624,6 +624,18 @@ else if(!str_comp_nocase(pMsg->m_pMessage, "/emote"))
                 {
                        SendChatTarget(ClientID, "Emotes are as followed: /normal /surprise /happy /pain /blink /angry and /close");
                 }
+else if(!str_comp_nocase(pMsg->m_pMessage, "/powerups"))
+                {
+		SendChatTarget(ClientID, "********Powerups*********");
+		char aBuf[256];
+		char PUP_NAME[8][32]= {"Jump", "Hammer", "Plus Enemy Freeze Time", "Minus Self Freeze Time", "Hook Duration", "Hook Length", "Run", "Epic Ninja"};
+		for(int i = 0; i < NUM_PUPS; i++)
+		{
+			str_format(aBuf, sizeof(aBuf), "%s : %d", PUP_NAME[i], pPlayer->skills[i]);
+			SendChatTarget(ClientID, aBuf);
+		}
+		SendChatTarget(ClientID, "**************************");
+                }
 		else
 		
 		SendChat(ClientID, Team, pMsg->m_pMessage);
