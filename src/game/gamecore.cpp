@@ -43,9 +43,9 @@ bool CTuningParams::Get(const char *pName, float *pValue)
 	return false;
 }
 
-float HermiteBasis1(float V)
+float HermiteBasis1(float v)
 {
-	return 2*V*V*V - 3*V*V+1;
+	return 2*v*v*v - 3*v*v+1;
 }
 
 float VelocityRamp(float Value, float Start, float Range, float Curvature)
@@ -120,16 +120,16 @@ void CCharacterCore::Tick(bool UseInput)
 		}
 
 		// setup angle
-		float A = 0;
+		float a = 0;
 		if(m_Input.m_TargetX == 0)
-			A = atanf((float)m_Input.m_TargetY);
+			a = atanf((float)m_Input.m_TargetY);
 		else
-			A = atanf((float)m_Input.m_TargetY/(float)m_Input.m_TargetX);
+			a = atanf((float)m_Input.m_TargetY/(float)m_Input.m_TargetX);
 			
 		if(m_Input.m_TargetX < 0)
-			A = A+pi;
+			a = a+pi;
 			
-		m_Angle = (int)(A*256.0f);
+		m_Angle = (int)(a*256.0f);
 
 		// handle jump
 		if(m_Input.m_Jump)
@@ -236,7 +236,7 @@ void CCharacterCore::Tick(bool UseInput)
 		// Check against other players first
 		if(m_pWorld && m_pWorld->m_Tuning.m_PlayerHooking)
 		{
-			float Dist = 0.0f;
+			float Distance = 0.0f;
 			for(int i = 0; i < MAX_CLIENTS; i++)
 			{
 				CCharacterCore *pCharCore = m_pWorld->m_apCharacters[i];
@@ -246,13 +246,13 @@ void CCharacterCore::Tick(bool UseInput)
 				vec2 ClosestPoint = closest_point_on_line(m_HookPos, NewPos, pCharCore->m_Pos);
 				if(distance(pCharCore->m_Pos, ClosestPoint) < PhysSize+2.0f)
 				{
-					if (m_HookedPlayer == -1 || distance(m_HookPos, pCharCore->m_Pos) < Dist)
+					if (m_HookedPlayer == -1 || distance(m_HookPos, pCharCore->m_Pos) < Distance)
 					{
 						m_TriggeredEvents |= COREEVENT_HOOK_ATTACH_PLAYER;
 						m_HookState = HOOK_GRABBED;
 						forceupdate  = true;
 						m_HookedPlayer = i;
-						Dist = distance(m_HookPos, pCharCore->m_Pos);
+						Distance = distance(m_HookPos, pCharCore->m_Pos);
 					}
 				}
 			}
@@ -345,26 +345,26 @@ void CCharacterCore::Tick(bool UseInput)
 				continue; // make sure that we don't nudge our self
 			
 			// handle player <-> player collision
-			float D = distance(m_Pos, pCharCore->m_Pos);
+			float Distance = distance(m_Pos, pCharCore->m_Pos);
 			vec2 Dir = normalize(m_Pos - pCharCore->m_Pos);
-			if(D < PhysSize*1.25f && D > 1.0f)
+			if(Distance < PhysSize*1.25f && Distance > 1.0f)
 			{
-				float A = (PhysSize*1.45f - D);
+				float a = (PhysSize*1.45f - Distance);
 
 				// make sure that we don't add excess force by checking the
 				// direction against the current velocity
 				vec2 VelDir = normalize(m_Vel);
-				float V = 1-(dot(VelDir, Dir)+1)/2;
-				m_Vel = m_Vel + Dir*A*(V*0.75f);
+				float v = 1-(dot(VelDir, Dir)+1)/2;
+				m_Vel = m_Vel + Dir*a*(v*0.75f);
 				m_Vel = m_Vel * 0.85f;
 			}
 			
 			// handle hook influence
 			if(m_HookedPlayer == i)
 			{
-				if(D > PhysSize*1.50f) // TODO: fix tweakable variable
+				if(Distance > PhysSize*1.50f) // TODO: fix tweakable variable
 				{
-					float Accel = m_pWorld->m_Tuning.m_HookDragAccel * (D/m_pWorld->m_Tuning.m_HookLength);
+					float Accel = m_pWorld->m_Tuning.m_HookDragAccel * (Distance/m_pWorld->m_Tuning.m_HookLength);
 					float DragSpeed = m_pWorld->m_Tuning.m_HookDragSpeed;
 					
 					// add force to the hooked player
