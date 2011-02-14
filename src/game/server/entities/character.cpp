@@ -607,8 +607,8 @@ void CCharacter::Tick()
 
        if (m_Core.m_HookedPlayer >= 0) {
                if (GameServer()->m_apPlayers[m_Core.m_HookedPlayer] && GameServer()->m_apPlayers[m_Core.m_HookedPlayer]->GetCharacter()) {
-                       GameServer()->m_apPlayers[m_Core.m_HookedPlayer]->GetCharacter()->lasthookedat = Server()->Tick();
-                       GameServer()->m_apPlayers[m_Core.m_HookedPlayer]->GetCharacter()->lasthookedby = m_pPlayer->GetCID();
+                    //   GameServer()->m_apPlayers[m_Core.m_HookedPlayer]->GetCharacter()->lasthookedat = Server()->Tick();
+                     //  GameServer()->m_apPlayers[m_Core.m_HookedPlayer]->GetCharacter()->lasthookedby = m_pPlayer->GetCID();
               }
        }
 
@@ -1186,8 +1186,8 @@ void CCharacter::Snap(int SnappingClient)
 
 	if(pCharacter->m_Emote == EMOTE_NORMAL)
 	{
-		if(250 - ((Server()->Tick() - m_LastAction)%(250)) < 5)
-			pCharacter->m_Emote = EMOTE_BLINK;
+	//	if(250 - ((Server()->Tick() - m_LastAction)%(250)) < 5)
+	//		pCharacter->m_Emote = EMOTE_BLINK;
 	}
 
 	pCharacter->m_PlayerState = m_PlayerState;
