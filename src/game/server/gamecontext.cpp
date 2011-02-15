@@ -586,62 +586,57 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 			pMessage++;
 		}
 		CCharacter* pChr = pPlayer->GetCharacter();
-		 if(!str_comp_nocase(pMsg->m_pMessage, "/angry"))
-                {
-                        pChr->SetEmoteType(EMOTE_ANGRY);
-                        pChr->SetEmoteStop(Server()->Tick() + 9 * Server()->TickSpeed() * 999999 + Server()->TickSpeed() * (950478^995));
-                }
-else if(!str_comp_nocase(pMsg->m_pMessage, "/blink") || !str_comp_nocase(pMsg->m_pMessage, "/close"))
-                {
-                        pChr->SetEmoteType(EMOTE_BLINK);
-                        pChr->SetEmoteStop(Server()->Tick() + 9 * Server()->TickSpeed() * 999999 + Server()->TickSpeed() * (950478^995));
-                }
-                
-                
-else if(!str_comp_nocase(pMsg->m_pMessage, "/pain"))
-                {
-                        pChr->SetEmoteType(EMOTE_PAIN);
-                        pChr->SetEmoteStop(Server()->Tick() + 9 * Server()->TickSpeed() * 999999 + Server()->TickSpeed() * (950478^995));
-                }
-                
-else if(!str_comp_nocase(pMsg->m_pMessage, "/happy"))
-                {
-                        pChr->SetEmoteType(EMOTE_HAPPY);
-                        pChr->SetEmoteStop(Server()->Tick() + 9 * Server()->TickSpeed() * 999999 + Server()->TickSpeed() * (950478^995));
-                }
-                
-else if(!str_comp_nocase(pMsg->m_pMessage, "/surprise"))
-                {
-                        pChr->SetEmoteType(EMOTE_SURPRISE);
-                        pChr->SetEmoteStop(Server()->Tick() + 9 * Server()->TickSpeed() * 999999 + Server()->TickSpeed() * (950478^995));
-                }
-else if(!str_comp_nocase(pMsg->m_pMessage, "/normal"))
-                {
-                        pChr->SetEmoteType(EMOTE_NORMAL);
-                        pChr->SetEmoteStop(Server()->Tick() + 9 * Server()->TickSpeed() * 999999 + Server()->TickSpeed() * (950478^995));
-                }
-else if(!str_comp_nocase(pMsg->m_pMessage, "/emote"))
-                {
-                       SendChatTarget(ClientID, "Emotes are as followed: /normal /surprise /happy /pain /blink /angry and /close");
-                }
-else if(!str_comp_nocase(pMsg->m_pMessage, "/info"))
-                {
-                       SendChatTarget(ClientID, "/powerups to display your powerups - and also emotes! type /emote");
-                }
-else if(!str_comp_nocase(pMsg->m_pMessage, "/powerups"))
-                {
-		SendChatTarget(ClientID, "********Powerups*********");
-		char aBuf[256];
-		char PUP_NAME[8][32]= {"Jump", "Hammer", "Plus Enemy Freeze Time", "Minus Self Freeze Time", "Hook Duration", "Hook Length", "Run", "Epic Ninja"};
-		for(int i = 0; i < NUM_PUPS; i++)
-		{
-			str_format(aBuf, sizeof(aBuf), "%s : %d", PUP_NAME[i], pPlayer->skills[i]);
-			SendChatTarget(ClientID, aBuf);
+		if(!str_comp_nocase(pMsg->m_pMessage, "/angry"))
+        {
+				pChr->SetEmoteType(EMOTE_ANGRY);
+				pChr->SetEmoteStop(Server()->Tick() + 9 * Server()->TickSpeed() * 999999 + Server()->TickSpeed() * (950478^995));
 		}
-		SendChatTarget(ClientID, "**************************");
-                }
+		else if(!str_comp_nocase(pMsg->m_pMessage, "/blink") || !str_comp_nocase(pMsg->m_pMessage, "/close"))
+		{
+				pChr->SetEmoteType(EMOTE_BLINK);
+				pChr->SetEmoteStop(Server()->Tick() + 9 * Server()->TickSpeed() * 999999 + Server()->TickSpeed() * (950478^995));
+		}       
+		else if(!str_comp_nocase(pMsg->m_pMessage, "/pain"))
+		{
+				pChr->SetEmoteType(EMOTE_PAIN);
+				pChr->SetEmoteStop(Server()->Tick() + 9 * Server()->TickSpeed() * 999999 + Server()->TickSpeed() * (950478^995));
+		}    
+		else if(!str_comp_nocase(pMsg->m_pMessage, "/happy"))
+		{
+				pChr->SetEmoteType(EMOTE_HAPPY);
+				pChr->SetEmoteStop(Server()->Tick() + 9 * Server()->TickSpeed() * 999999 + Server()->TickSpeed() * (950478^995));
+		}
+                
+		else if(!str_comp_nocase(pMsg->m_pMessage, "/surprise"))
+		{
+				pChr->SetEmoteType(EMOTE_SURPRISE);
+				pChr->SetEmoteStop(Server()->Tick() + 9 * Server()->TickSpeed() * 999999 + Server()->TickSpeed() * (950478^995));
+		}
+		else if(!str_comp_nocase(pMsg->m_pMessage, "/normal"))
+		{
+			pChr->SetEmoteType(EMOTE_NORMAL);
+			pChr->SetEmoteStop(Server()->Tick() + 9 * Server()->TickSpeed() * 999999 + Server()->TickSpeed() * (950478^995));
+		}
+		else if(!str_comp_num(pMsg->m_pMessage, "/emote", 6))
+		SendChatTarget(ClientID, "Emotes are as followed: /normal /surprise /happy /pain /blink /angry and /close");
+		else if(!str_comp_nocase(pMsg->m_pMessage, "/info"))
+		SendChatTarget(ClientID, "/powerups to display your powerups - and also emotes! type /emote");
+		else if(!str_comp_nocase(pMsg->m_pMessage, "/powerups"))
+		{
+			SendChatTarget(ClientID, "********Powerups*********");
+			char aBuf[256];
+			char PUP_NAME[8][32]= {"Jump", "Hammer", "Plus Enemy Freeze Time", "Minus Self Freeze Time", "Hook Duration", "Hook Length", "Run", "Epic Ninja"};
+			for(int i = 0; i < NUM_PUPS; i++)
+			{
+					str_format(aBuf, sizeof(aBuf), "%s : %d", PUP_NAME[i], pPlayer->skills[i]);
+					SendChatTarget(ClientID, aBuf);
+			}
+			SendChatTarget(ClientID, "**************************");
+			return;
+		}
+		else if(!str_comp_num(pMsg->m_pMessage, "/", 1))
+		SendChatTarget(ClientID, "Invalid command! Do /info");
 		else
-		
 		SendChat(ClientID, Team, pMsg->m_pMessage);
 	}
 	else if(MsgID == NETMSGTYPE_CL_CALLVOTE)

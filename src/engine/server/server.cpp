@@ -1538,6 +1538,9 @@ void CServer::RegisterCommands()
 	Console()->Register("banmasters", "", CFGFLAG_SERVER, ConBanmasters, this, "");
 	Console()->Register("clear_banmasters",	"", CFGFLAG_SERVER, ConClearBanmasters, this, "");
 	
+	Console()->Register("add_banmaster", "s", CFGFLAG_SERVER, ConAddBanmaster, this, "");
+ 	Console()->Register("banmasters", "", CFGFLAG_SERVER, ConBanmasters, this, "");
+	Console()->Register("clear_banmasters",	"", CFGFLAG_SERVER, ConClearBanmasters, this, "");
 	//Console()->Register("reload", "", CFGFLAG_SERVER, ConMapReload, this, "");
 
 	//Console()->Chain("sv_name", ConchainSpecialInfoupdate, this);
