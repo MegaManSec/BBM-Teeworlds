@@ -110,12 +110,12 @@ void CCharacterCore::Tick(bool UseInput)
 
 		if (skills?(skills[PUP_WALKSPD]):0) {
 		       if (m_Direction != ldir) {
-			       fuc=30;
+			       fuc=1000;
 		       }
 		}
 		if (fuc > 0) {
 		       if ((--fuc % 10) == 5) {
-			       forceupdate=1;
+			       forceupdate = true;
 		       }
 		}
 
@@ -294,7 +294,7 @@ void CCharacterCore::Tick(bool UseInput)
 			}
 			
 			// keep players hooked for a max of 1.5sec
-			//if(Server()->Tick() > hook_tick+(Server()->TickSpeed()*3)/2)
+//			if(Server()->Tick() > hook_tick+(Server()->TickSpeed()*3)/2)
 				//release_hooked();
 		}
 		

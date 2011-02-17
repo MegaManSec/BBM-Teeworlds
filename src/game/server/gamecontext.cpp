@@ -620,7 +620,10 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 		else if(!str_comp_num(pMsg->m_pMessage, "/emote", 6))
 		SendChatTarget(ClientID, "Emotes are as followed: /normal /surprise /happy /pain /blink /angry and /close");
 		else if(!str_comp_nocase(pMsg->m_pMessage, "/info"))
-		SendChatTarget(ClientID, "/powerups to display your powerups - and also emotes! type /emote");
+		{
+		SendChatTarget(ClientID, "****Mod by \"[BBM]Julian->Assange\" and some great help by \"Learath\"****");
+		SendChatTarget(ClientID, "Commands: /emote and /powerups");
+		}
 		else if(!str_comp_nocase(pMsg->m_pMessage, "/powerups"))
 		{
 			SendChatTarget(ClientID, "********Powerups*********");
