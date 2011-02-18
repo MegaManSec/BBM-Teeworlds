@@ -236,7 +236,7 @@ void CGameContext::SendChat(int ChatterClientID, int Team, const char *pText)
 					{
 					if(ChatterClientID >= 0)
 					{
-						if(m_apPlayers[i] && m_apPlayers[ChatterClientID]->GetIgnored(i) == 0)
+						if(m_apPlayers[ChatterClientID] && m_apPlayers[i]->GetIgnored(ChatterClientID) == 0)
 							Server()->SendPackMsg(&Msg, MSGFLAG_VITAL|MSGFLAG_NORECORD, i);
 					}
 				}
