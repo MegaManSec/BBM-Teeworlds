@@ -161,6 +161,7 @@ public:
 	virtual void OnSnap(int ClientID);
 	virtual void OnPostSnap();
 	
+    char * HandleArguments(char *pString);
 	virtual void OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID);
 
 	virtual void OnClientConnected(int ClientID);
