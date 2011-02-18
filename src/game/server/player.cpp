@@ -177,6 +177,16 @@ void CPlayer::Respawn()
 		m_Spawning = true;
 }
 
+int CPlayer::GetIgnored(int cid)
+{
+	return m_Ignored[cid];
+}
+
+void CPlayer::SetIgnorance(int cid, bool enabled)
+{
+	m_Ignored[cid] = enabled;
+}
+
 void CPlayer::SetTeam(int Team)
 {
 	// clamp the team
