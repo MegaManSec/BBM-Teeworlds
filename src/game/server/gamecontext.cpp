@@ -614,7 +614,7 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 						str_format(aBuf, sizeof(aBuf), "%s Ignored", Server()->ClientName(i));
 						SendChatTarget(ClientID, aBuf);
 					}
-					else
+					else if(m_apPlayers[ClientID]->GetIgnored(i) == 1)
 					{
 						str_format(aBuf, sizeof(aBuf), "%s UnIgnored", Server()->ClientName(i));
 						m_apPlayers[ClientID]->SetIgnorance(i, 0);
