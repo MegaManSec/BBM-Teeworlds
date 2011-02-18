@@ -215,6 +215,7 @@ void CGameContext::SendChatTarget(int To, const char *pText)
 }
 
 
+
 void CGameContext::SendChat(int ChatterClientID, int Team, const char *pText)
 {
 	char aBuf[256];
@@ -225,13 +226,18 @@ void CGameContext::SendChat(int ChatterClientID, int Team, const char *pText)
 	Console()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "chat", aBuf);
 
 	if(Team == CHAT_ALL)
-	{
-		CNetMsg_Sv_Chat Msg;
-		Msg.m_Team = 0;
-		Msg.m_ClientID = ChatterClientID;
-		Msg.m_pMessage = pText;
-		Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, -1);
-	}
+		{
+			CNetMsg_Sv_Chat Msg;
+			Msg.m_Team = 0;
+			Msg.m_ClientID = ChatterClientID;
+			Msg.m_pMessage = pText;
+			Server()->SendPackMsg(&Msg, MSGFLAG_VITAL|MSGFLAG_NOSEND, -1);
+			for(int i = 0; i < MAX_CLIENTS; i++)
+					{
+						if(m_apPlayers[i] && m_apPlayers[ChatterClientID]->GetIgnored(i) == 0)
+							Server()->SendPackMsg(&Msg, MSGFLAG_VITAL|MSGFLAG_NORECORD, i);
+					}
+		}
 	else
 	{
 		CNetMsg_Sv_Chat Msg;
@@ -592,6 +598,36 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 			pMessage++;
 		}
 		CCharacter* pChr = pPlayer->GetCharacter();
+		if(!str_comp_num(pMsg->m_pMessage, "/ignore", 7))
+		{
+			char aBuf[256];
+			for(int i = 0; i < MAX_CLIENTS; ++i)
+			{
+				if(!str_comp_nocase(HandleArguments((char *)pMsg->m_pMessage), Server()->ClientName(i)))
+				{
+					if(m_apPlayers[ClientID]->GetIgnored(i) == 0)
+					{
+						m_apPlayers[ClientID]->SetIgnorance(i, 1);
+						str_format(aBuf, sizeof(aBuf), "%s Ignored", Server()->ClientName(i));
+						SendChatTarget(ClientID, aBuf);
+					}
+					else
+					{
+						str_format(aBuf, sizeof(aBuf), "%s UnIgnored", Server()->ClientName(i));
+						m_apPlayers[ClientID]->SetIgnorance(i, 0);
+						SendChatTarget(ClientID, aBuf);
+					}
+				}
+				else if(!str_comp_nocase(HandleArguments((char *)pMsg->m_pMessage), Server()->ClientName(ClientID)))
+				{
+					SendChatTarget(ClientID, "You Can't Ignore Yourself!");
+				}
+				else
+				{
+					SendChatTarget(ClientID, "No Such Player!");
+				}
+			}
+		}
 		if(!str_comp_num(pMsg->m_pMessage, "/emote", 6))
 		{
 			if (!str_comp_nocase(HandleArguments((char *)pMsg->m_pMessage), "normal"))
