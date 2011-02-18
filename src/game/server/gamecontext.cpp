@@ -236,7 +236,7 @@ void CGameContext::SendChat(int ChatterClientID, int Team, const char *pText)
 					{
 					if(ChatterClientID >= 0)
 					{
-						if(m_apPlayers[ChatterClientID] && m_apPlayers[i]->GetIgnored(ChatterClientID) == 0)
+						if(m_apPlayers[i] && m_apPlayers[i]->GetIgnored(ChatterClientID) == 0)
 							Server()->SendPackMsg(&Msg, MSGFLAG_VITAL|MSGFLAG_NORECORD, i);
 					}
 				}
@@ -626,9 +626,10 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 					SendChatTarget(ClientID, "You Can't Ignore Yourself!");
 					return;
 				}
-				else
+				else if(str_comp_nocase(HandleArguments((char *)pMsg->m_pMessage), Server()->ClientName(i)))
 				{
 					SendChatTarget(ClientID, "No Such Player!");
+					return;
 				}
 			}
 		}
