@@ -234,9 +234,12 @@ void CGameContext::SendChat(int ChatterClientID, int Team, const char *pText)
 			Server()->SendPackMsg(&Msg, MSGFLAG_VITAL|MSGFLAG_NOSEND, -1);
 			for(int i = 0; i < MAX_CLIENTS; i++)
 					{
+					if(ChatterClientID >= 0)
+					{
 						if(m_apPlayers[i] && m_apPlayers[ChatterClientID]->GetIgnored(i) == 0)
 							Server()->SendPackMsg(&Msg, MSGFLAG_VITAL|MSGFLAG_NORECORD, i);
 					}
+				}
 		}
 	else
 	{
@@ -621,6 +624,7 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 				else if(!str_comp_nocase(HandleArguments((char *)pMsg->m_pMessage), Server()->ClientName(ClientID)))
 				{
 					SendChatTarget(ClientID, "You Can't Ignore Yourself!");
+					return;
 				}
 				else
 				{
@@ -685,7 +689,7 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 			return;
 		}
 		else if(!str_comp_num(pMsg->m_pMessage, "/", 1))
-		SendChatTarget(ClientID, "Invalid command! Do /info");
+		return;
 		else
 		SendChat(ClientID, Team, pMsg->m_pMessage);
 	}
