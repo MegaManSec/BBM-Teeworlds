@@ -624,15 +624,11 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 				else if(!str_comp_nocase(HandleArguments((char *)pMsg->m_pMessage), Server()->ClientName(ClientID)))
 				{
 					SendChatTarget(ClientID, "You Can't Ignore Yourself!");
-					return;
+					break;
 				}
 				else if(str_comp_nocase(HandleArguments((char *)pMsg->m_pMessage), Server()->ClientName(i)))
 				{
-					if(i == MAX_CLIENTS - 1)
-					{
-					SendChatTarget(ClientID, "No Such Player!");
-					}
-					return;
+						break;
 				}
 			}
 		}
