@@ -517,6 +517,8 @@ void CGameContext::OnClientEnter(int ClientID)
 	char aBuf[512];
 	str_format(aBuf, sizeof(aBuf), "'%s' entered and joined the %s", Server()->ClientName(ClientID), m_pController->GetTeamName(m_apPlayers[ClientID]->GetTeam()));
 	SendChat(-1, CGameContext::CHAT_ALL, aBuf); 
+	SendChatTarget(clientID, "BBMod Made by [BBM]Julian->Assange And Some Great Helps By [BBM]Learath2");
+	SendChatTarget(clientID, "For Commands And Their Usages do /info");
 
 	str_format(aBuf, sizeof(aBuf), "team_join player='%d:%s' team=%d", ClientID, Server()->ClientName(ClientID), m_apPlayers[ClientID]->GetTeam());
 	Console()->Print(IConsole::OUTPUT_LEVEL_DEBUG, "game", aBuf);
@@ -609,6 +611,8 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 		if(!str_comp_num(pMsg->m_pMessage, "/ignore", 7))
 		{
 			char aBuf[256];
+			if(HandleArguments((char *)pMsg->m_pMessage))
+			{
 			for(int i = 0; i < MAX_CLIENTS; ++i)
 			{
 				if(!str_comp_nocase(HandleArguments((char *)pMsg->m_pMessage), Server()->ClientName(i)) && str_comp_nocase(HandleArguments((char *)pMsg->m_pMessage), Server()->ClientName(ClientID)))
@@ -631,6 +635,16 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 					SendChatTarget(ClientID, "You Can't Ignore Yourself!");
 					return;
 				}
+				else if(str_comp_nocase(HandleArguments((char *)pMsg->m_pMessage), Server()->ClientName(i)))
+				{
+					SendChatTarget(ClientID, "No Such Player!");
+					return;
+				}
+			}
+			}
+			else
+			{
+				SendChatTarget(ClientID, "/ignore Is Used Like This: /ignore PERSONSNAME - Use trunk too auto-tab their user-name.");
 			}
 		}
 		else if(!str_comp_num(pMsg->m_pMessage, "/emote", 6))
@@ -674,9 +688,9 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 		else if(!str_comp_nocase(pMsg->m_pMessage, "/info"))
 		{
 		SendChatTarget(ClientID, "****Mod by \"[BBM]Julian->Assange\" and some great help by \"Learath2\" <3****");
-		SendChatTarget(ClientID, "Commands: /emote and /powerups and /ignore use /ignore by doing this: /ignore PERSONSNAME - Use trunk too auto-tab there user-name.");
+		SendChatTarget(ClientID, "Commands: /emote , /powerups , /colors and /ignore.");
 		SendChatTarget(ClientID, "Ignore: Ignore sombody by doing this: /ignore PERSONSNAME - Use trunk client too auto-tab there user-name.");
-		SendChatTarget(ClientID, "Colors ; use /Colors too see what colors you are immune too.");
+		SendChatTarget(ClientID, "Colors ; use /Colors too see what colors you are immune to 1 means you are immune 0 means you are not.");
 		}
 		else if(!str_comp_nocase(pMsg->m_pMessage, "/powerups"))
 		{
