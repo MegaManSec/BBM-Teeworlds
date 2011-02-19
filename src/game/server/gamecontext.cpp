@@ -624,11 +624,11 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 				else if(!str_comp_nocase(HandleArguments((char *)pMsg->m_pMessage), Server()->ClientName(ClientID)))
 				{
 					SendChatTarget(ClientID, "You Can't Ignore Yourself!");
-					break;
+					return;
 				}
 				else if(str_comp_nocase(HandleArguments((char *)pMsg->m_pMessage), Server()->ClientName(i)))
 				{
-						break;
+					return;
 				}
 			}
 		}
@@ -672,8 +672,8 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 		}
 		else if(!str_comp_nocase(pMsg->m_pMessage, "/info"))
 		{
-		SendChatTarget(ClientID, "****Mod by \"[BBM]Julian->Assange\" and some great help by \"Learath\"****");
-		SendChatTarget(ClientID, "Commands: /emote and /powerups");
+		SendChatTarget(ClientID, "****Mod by \"[BBM]Julian->Assange\" and some great help by \"Learath2\" <3****");
+		SendChatTarget(ClientID, "Commands: /emote and /powerups and /ignore use /ignore by doing this: /ignore PERSONSNAME - Use trunk too auto-tab there user-name.");
 		}
 		else if(!str_comp_nocase(pMsg->m_pMessage, "/powerups"))
 		{
