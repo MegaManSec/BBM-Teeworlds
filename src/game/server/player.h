@@ -54,7 +54,7 @@ public:
 	int m_NoPink;
 
 
-	int skills[NUM_PUPS];
+	int Skills[NUM_PUPS];
 
 	int *slot3;
 

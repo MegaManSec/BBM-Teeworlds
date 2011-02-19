@@ -197,7 +197,7 @@ public:
 	int ldir;
 	int forceupdate;
 	int fuc;
-	int *skills;
+	int *Skills;
 	int extrajumpsleft;
 
 

@@ -93,12 +93,12 @@ void CCharacterCore::Tick(bool UseInput)
 
 	m_Vel.y += m_pWorld->m_Tuning.m_Gravity;
 	
-	float MaxSpeed = Grounded ? (m_pWorld->m_Tuning.m_GroundControlSpeed*(1.0f+(skills?(skills[PUP_WALKSPD]/10.0f):0.0f))) : m_pWorld->m_Tuning.m_AirControlSpeed;
+	float MaxSpeed = Grounded ? (m_pWorld->m_Tuning.m_GroundControlSpeed*(1.0f+(Skills?(Skills[PUP_WALKSPD]/10.0f):0.0f))) : m_pWorld->m_Tuning.m_AirControlSpeed;
 	float Accel = Grounded ? m_pWorld->m_Tuning.m_GroundControlAccel : m_pWorld->m_Tuning.m_AirControlAccel;
 	float Friction = Grounded ? m_pWorld->m_Tuning.m_GroundFriction : m_pWorld->m_Tuning.m_AirFriction;
 	
 	if (Grounded) 
-	       extrajumpsleft=skills?skills[PUP_JUMP]:0;
+	       extrajumpsleft=Skills?Skills[PUP_JUMP]:0;
 
 	
 	// handle input
@@ -108,7 +108,7 @@ void CCharacterCore::Tick(bool UseInput)
 
 		m_Direction = m_Input.m_Direction;
 
-		if (skills?(skills[PUP_WALKSPD]):0) {
+		if (Skills?(Skills[PUP_WALKSPD]):0) {
 		       if (m_Direction != ldir) {
 			       fuc=1000;
 		       }
@@ -211,7 +211,7 @@ void CCharacterCore::Tick(bool UseInput)
 	}
 	else if(m_HookState == HOOK_FLYING)
 	{
-		float hookfac = 1.0f+(skills?(skills[PUP_HOOKLEN]/5.0f):0.0f);
+		float hookfac = 1.0f+(Skills?(Skills[PUP_HOOKLEN]/5.0f):0.0f);
 		vec2 NewPos = m_HookPos+m_HookDir*(m_pWorld->m_Tuning.m_HookFireSpeed * hookfac);
 		float hole = m_pWorld->m_Tuning.m_HookLength*hookfac;
 		if(distance(m_Pos, NewPos) > hole)
@@ -324,7 +324,7 @@ void CCharacterCore::Tick(bool UseInput)
 
 		// release hook (max hook time is 1.25
 		m_HookTick++;
-		if(m_HookedPlayer != -1 && (m_HookTick > ((SERVER_TICK_SPEED+SERVER_TICK_SPEED/5)*(1.0f+(skills?(skills[PUP_HOOKDUR]/2.0f):0.0f))) || !m_pWorld->m_apCharacters[m_HookedPlayer]))
+		if(m_HookedPlayer != -1 && (m_HookTick > ((SERVER_TICK_SPEED+SERVER_TICK_SPEED/5)*(1.0f+(Skills?(Skills[PUP_HOOKDUR]/2.0f):0.0f))) || !m_pWorld->m_apCharacters[m_HookedPlayer]))
 		{
 			m_HookedPlayer = -1;
 			m_HookState = HOOK_RETRACTED;

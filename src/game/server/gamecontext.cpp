@@ -611,7 +611,7 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 			char aBuf[256];
 			for(int i = 0; i < MAX_CLIENTS; ++i)
 			{
-				if(!str_comp_nocase(HandleArguments((char *)pMsg->m_pMessage), Server()->ClientName(i)))
+				if(!str_comp_nocase(HandleArguments((char *)pMsg->m_pMessage), Server()->ClientName(i)) && str_comp_nocase(HandleArguments((char *)pMsg->m_pMessage), Server()->ClientName(ClientID)))
 				{
 					if(m_apPlayers[ClientID]->GetIgnored(i) == 0)
 					{
@@ -631,13 +631,9 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 					SendChatTarget(ClientID, "You Can't Ignore Yourself!");
 					return;
 				}
-				else if(str_comp_nocase(HandleArguments((char *)pMsg->m_pMessage), Server()->ClientName(i)))
-				{
-					return;
-				}
 			}
 		}
-		if(!str_comp_num(pMsg->m_pMessage, "/emote", 6))
+		else if(!str_comp_num(pMsg->m_pMessage, "/emote", 6))
 		{
 			if (!str_comp_nocase(HandleArguments((char *)pMsg->m_pMessage), "normal"))
 			{
@@ -679,6 +675,8 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 		{
 		SendChatTarget(ClientID, "****Mod by \"[BBM]Julian->Assange\" and some great help by \"Learath2\" <3****");
 		SendChatTarget(ClientID, "Commands: /emote and /powerups and /ignore use /ignore by doing this: /ignore PERSONSNAME - Use trunk too auto-tab there user-name.");
+		SendChatTarget(ClientID, "Ignore: Ignore sombody by doing this: /ignore PERSONSNAME - Use trunk client too auto-tab there user-name.");
+		SendChatTarget(ClientID, "Colors ; use /Colors too see what colors you are immune too.");
 		}
 		else if(!str_comp_nocase(pMsg->m_pMessage, "/powerups"))
 		{
@@ -687,7 +685,7 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 			char PUP_NAME[8][32]= {"Jump", "Hammer", "Plus Enemy Freeze Time", "Minus Self Freeze Time", "Hook Duration", "Hook Length", "Run", "Epic Ninja"};
 			for(int i = 0; i < NUM_PUPS; i++)
 			{
-					str_format(aBuf, sizeof(aBuf), "%s : %d", PUP_NAME[i], pPlayer->skills[i]);
+					str_format(aBuf, sizeof(aBuf), "%s : %d", PUP_NAME[i], pPlayer->Skills[i]);
 					SendChatTarget(ClientID, aBuf);
 			}
 			SendChatTarget(ClientID, "**************************");
@@ -734,7 +732,7 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 			return;
 		}
 		else if(!str_comp_num(pMsg->m_pMessage, "/", 1))
-		return;
+		SendChatTarget(ClientID, "Invalid command! do /info");
 		else
 		SendChat(ClientID, Team, pMsg->m_pMessage);
 	}
@@ -795,7 +793,7 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 		}
 		else if(str_comp_nocase(pMsg->m_Type, "kick") == 0)
 		{
-			if(!g_Config.m_SvVoteKick)
+			if(!g_Config.m_SvVoteKick || g_Config.m_SvVoteKick)
 			{
 				SendChatTarget(ClientID, "Server does not allow voting to kick players");
 				return;

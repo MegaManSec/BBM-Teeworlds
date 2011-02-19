@@ -14,7 +14,7 @@
 #include "laser.h"
 #include "projectile.h"
 
-static char bbuf[512];
+static char bBuf[128];
 
 //input count
 struct CInputCount
@@ -83,12 +83,12 @@ bool CCharacter::Spawn(CPlayer *pPlayer, vec2 Pos)
 	GameServer()->m_World.InsertEntity(this);
 	m_Alive = true;
 
-	m_Core.skills=m_pPlayer->skills;
+	m_Core.Skills=m_pPlayer->Skills;
 	if (m_pPlayer->is1on1) {
 		int *sl = m_pPlayer->slot3;
 		if (sl) {
 			for (int z = 0; z < NUM_PUPS; ++z)
-				m_pPlayer->skills[z] = sl[z];
+				m_pPlayer->Skills[z] = sl[z];
 		}
 		Server()->SetClientName(m_pPlayer->GetCID(), m_pPlayer->oname);
 		free(m_pPlayer->oname);
@@ -339,7 +339,7 @@ void CCharacter::FireWeapon()
 					Dir = normalize(pTarget->m_Pos - m_Pos);
 				else
 					Dir = vec2(0.f, -1.f);
-				pTarget->m_Core.m_Vel += normalize(Dir + vec2(0.f, -1.1f)) * (10.0f + (m_pPlayer->skills[PUP_HAMMER] * 3));
+				pTarget->m_Core.m_Vel += normalize(Dir + vec2(0.f, -1.1f)) * (10.0f + (m_pPlayer->Skills[PUP_HAMMER] * 3));
 				pTarget->Unfreeze();
 				Hits++;
 			}
@@ -437,14 +437,14 @@ void CCharacter::FireWeapon()
 		
 		case WEAPON_NINJA:
 		{
-			if (m_pPlayer->skills[PUP_EPICNINJA]) {
+			if (m_pPlayer->Skills[PUP_EPICNINJA]) {
 				if ((lastepicninja + 10 * Server()->TickSpeed()) < Server()->Tick()) {
 					lastepicninja=Server()->Tick();
 					epicninjaoldpos=m_Pos;
 					epicninjaannounced=0;
 				} else {
-					str_format(bbuf, 128, "epic ninja not yet ready.");
-					GameServer()->SendChatTarget(m_pPlayer->GetCID(), bbuf);
+					str_format(bBuf, 128, "epic ninja not yet ready.");
+					GameServer()->SendChatTarget(m_pPlayer->GetCID(), bBuf);
                                         return;
                                 }
                         } else {
@@ -595,9 +595,9 @@ void CCharacter::Tick()
                         Unfreeze();
                 }
         }
-        if (frz_tick && m_pPlayer->skills[PUP_EPICNINJA] && ((lastepicninja+10*Server()->TickSpeed()) < Server()->Tick()) && !epicninjaannounced) {
-                str_format(bbuf, 128, "epic ninja ready!");
-                GameServer()->SendChatTarget(m_pPlayer->GetCID(), bbuf);
+        if (frz_tick && m_pPlayer->Skills[PUP_EPICNINJA] && ((lastepicninja+10*Server()->TickSpeed()) < Server()->Tick()) && !epicninjaannounced) {
+                str_format(bBuf, 128, "epic ninja ready!");
+                GameServer()->SendChatTarget(m_pPlayer->GetCID(), bBuf);
                 epicninjaannounced=1;
         }
 
@@ -624,7 +624,7 @@ void CCharacter::Tick()
                         int hooked = lasthookedat > lasthammeredat;
                         int by = hooked ? lasthookedby : lasthammeredby;
                         if (GameServer()->m_apPlayers[by] && GameServer()->m_apPlayers[by]->GetCharacter()) {
-                                add = GameServer()->m_apPlayers[by]->skills[PUP_LFREEZE];
+                                add = GameServer()->m_apPlayers[by]->Skills[PUP_LFREEZE];
                         }
                         blockedby=by;
                         if (blockedby>=0) blocktime=ft+(add * (Server()->TickSpeed()>>1));
@@ -635,7 +635,7 @@ void CCharacter::Tick()
                         if (blockedby>=0)
                                 ft=blocktime;
                 }
-                add -=m_pPlayer->skills[PUP_SFREEZE];
+                add -=m_pPlayer->Skills[PUP_SFREEZE];
                 ft += (add * (Server()->TickSpeed()>>1));
                 wasout=0;
                 Freeze(ft);
@@ -737,8 +737,8 @@ void CCharacter::Tick()
                                sl = (int*) malloc(sizeof(int) * NUM_PUPS);
                                for (int z = 0; z < NUM_PUPS; ++z)
                                {
-                                       sl[z] = m_pPlayer->skills[z];
-                                       m_pPlayer->skills[z] = 0;
+                                       sl[z] = m_pPlayer->Skills[z];
+                                       m_pPlayer->Skills[z] = 0;
                                }
                                m_pPlayer->slot3 = sl;
                                m_pPlayer->oname = strdup(Server()->ClientName(m_pPlayer->GetCID()));
@@ -753,15 +753,15 @@ void CCharacter::Tick()
                                if (sl)
                                {
                                        for (int z = 0; z < NUM_PUPS; ++z)
-                                               m_pPlayer->skills[z] = sl[z];
+                                               m_pPlayer->Skills[z] = sl[z];
                                }
                                Server()->SetClientName(m_pPlayer->GetCID(), m_pPlayer->oname);
                                free(m_pPlayer->oname);
                                m_pPlayer->oname = NULL;
                        }
 
-                       str_format(bbuf, 128, "1on1 mode %s", (m_pPlayer->is1on1) ? "ON" : "OFF");
-                       GameServer()->SendChatTarget(m_pPlayer->GetCID(), bbuf);
+                       str_format(bBuf, 128, "1on1 mode %s", (m_pPlayer->is1on1) ? "ON" : "OFF");
+                       GameServer()->SendChatTarget(m_pPlayer->GetCID(), bBuf);
                }
 
 	} else if (col >= TILE_BOOST_L && col <= TILE_BOOST_U) {
@@ -794,9 +794,9 @@ void CCharacter::Tick()
                        }
                        else
                        {
-				if (m_pPlayer->skills[tmp] < 10) {
-				    m_pPlayer->skills[tmp]++;
-				    tell_powerup_info(m_pPlayer->GetCID(), tmp);
+				if (m_pPlayer->Skills[tmp] < 10) {
+				    m_pPlayer->Skills[tmp]++;
+				    TellPowerUpInfo(m_pPlayer->GetCID(), tmp);
 				}
                        }
                }
@@ -807,7 +807,7 @@ void CCharacter::Tick()
                        lastup = Server()->Tick();
 		       for (int z = 0; z < NUM_PUPS; ++z)
 		       {
-			       m_pPlayer->skills[z] = 0;
+			       m_pPlayer->Skills[z] = 0;
 		       }
 		       GameServer()->SendChatTarget(m_pPlayer->GetCID(), "select new powerups!");
 		}
@@ -987,30 +987,30 @@ bool CCharacter::Unfreeze(){
 return true;
 }
 
-void CCharacter::tell_powerup_info(int client_id, int skill)
+void CCharacter::TellPowerUpInfo(int ClientID, int Skill)
 {
-       static char bbuf[256];
-       switch(skill) {
+	static char bBuf[512];
+       switch(Skill) {
                case PUP_JUMP:
-                       str_format(bbuf, 128, "you got an extra air jump!");break;
+                       str_format(bBuf, 128, "you got an extra air jump!");break;
                case PUP_HAMMER:
-                       str_format(bbuf, 128, "hammer powered!");break;
+                       str_format(bBuf, 128, "hammer powered!");break;
                case PUP_LFREEZE:
-                       str_format(bbuf, 128, "enemy freeze time increased!");break;
+                       str_format(bBuf, 128, "enemy freeze time increased!");break;
                case PUP_SFREEZE:
-                       str_format(bbuf, 128, "own freeze time shortened!");break;
+                       str_format(bBuf, 128, "own freeze time shortened!");break;
                case PUP_HOOKDUR:
-                       str_format(bbuf, 128, "hook duration increased (you wont see it but it works!)!");break;
+                       str_format(bBuf, 128, "hook duration increased (you wont see it but it works!)!");break;
                case PUP_HOOKLEN:
-                       str_format(bbuf, 128, "hook length extended (its not smooth, however)");break;
+                       str_format(bBuf, 128, "hook length extended (its not smooth, however)");break;
                case PUP_WALKSPD:
-                       str_format(bbuf, 128, "walk speed increased");break;
+                       str_format(bBuf, 128, "walk speed increased");break;
                case PUP_EPICNINJA:
-                       str_format(bbuf, 128, "eeeeeeeeeeeeeeeeepic ninja! (freeze attack)");break;
+                       str_format(bBuf, 128, "eeeeeeeeeeeeeeeeepic ninja! (freeze attack)");break;
                default:
-                       str_format(bbuf, 128, "wtf");break;
+                       str_format(bBuf, 128, "wtf");break;
        }
-       GameServer()->SendChatTarget(client_id, bbuf);
+       GameServer()->SendChatTarget(ClientID, bBuf);
 }
 
 void CCharacter::Die(int Killer, int Weapon)

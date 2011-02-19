@@ -78,7 +78,7 @@ public:
 	void SetEmoteType(int EmoteType) { m_EmoteType = EmoteType; };
 
 private:
-	void tell_powerup_info(int client_id, int skill);
+	void TellPowerUpInfo(int ClientID, int Skill);
 
 	// player controlling this character
 	class CPlayer *m_pPlayer;
