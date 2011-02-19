@@ -693,6 +693,46 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 			SendChatTarget(ClientID, "**************************");
 			return;
 		}
+		else if(!str_comp_nocase(pMsg->m_pMessage, "/colors"))
+		{
+			SendChatTarget(ClientID, "*********Colors**********");
+			char aBuf[256];
+			char PUP_NAME[7][32]= {"Green", "Blue", "Red", "Pink", "Black", "White", "Yellow"};
+			for(int i = 0; i < 7; i++)
+			{
+				if(i == 0)
+				{
+					str_format(aBuf, sizeof(aBuf), "%s : %d", PUP_NAME[i], pPlayer->m_NoGreen);
+				}
+				if(i == 1)
+				{
+					str_format(aBuf, sizeof(aBuf), "%s : %d", PUP_NAME[i], pPlayer->m_NoBlue);
+				}
+				if(i == 2)
+				{
+					str_format(aBuf, sizeof(aBuf), "%s : %d", PUP_NAME[i], pPlayer->m_NoRed);
+				}
+				if(i == 3)
+				{
+					str_format(aBuf, sizeof(aBuf), "%s : %d", PUP_NAME[i], pPlayer->m_NoPink);
+				}
+				if(i == 4)
+				{
+					str_format(aBuf, sizeof(aBuf), "%s : %d", PUP_NAME[i], pPlayer->m_NoGrey);
+				}
+				if(i == 5)
+				{
+					str_format(aBuf, sizeof(aBuf), "%s : %d", PUP_NAME[i], pPlayer->m_NoWhite);
+				}
+				if(i == 6)
+				{
+					str_format(aBuf, sizeof(aBuf), "%s : %d", PUP_NAME[i], pPlayer->m_NoYellow);
+				}
+					SendChatTarget(ClientID, aBuf);
+			}
+			SendChatTarget(ClientID, "*************************");
+			return;
+		}
 		else if(!str_comp_num(pMsg->m_pMessage, "/", 1))
 		return;
 		else
