@@ -517,8 +517,8 @@ void CGameContext::OnClientEnter(int ClientID)
 	char aBuf[512];
 	str_format(aBuf, sizeof(aBuf), "'%s' entered and joined the %s", Server()->ClientName(ClientID), m_pController->GetTeamName(m_apPlayers[ClientID]->GetTeam()));
 	SendChat(-1, CGameContext::CHAT_ALL, aBuf); 
-	SendChatTarget(clientID, "BBMod Made by [BBM]Julian->Assange And Some Great Helps By [BBM]Learath2");
-	SendChatTarget(clientID, "For Commands And Their Usages do /info");
+	SendChatTarget(ClientID, "BBMod Made by [BBM]Julian->Assange And Some Great Helps By [BBM]Learath2");
+	SendChatTarget(ClientID, "For Commands And Their Usages do /info");
 
 	str_format(aBuf, sizeof(aBuf), "team_join player='%d:%s' team=%d", ClientID, Server()->ClientName(ClientID), m_apPlayers[ClientID]->GetTeam());
 	Console()->Print(IConsole::OUTPUT_LEVEL_DEBUG, "game", aBuf);
