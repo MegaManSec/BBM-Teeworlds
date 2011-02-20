@@ -1006,13 +1006,13 @@ void CServer::PumpNetwork()
 					SendServerInfo(&Packet.m_Address, -1);
 				}
 				
-				if(Packet.m_DataSize >= sizeof(BANMASTER_IPOK) &&
+				if((unsigned int)Packet.m_DataSize >= sizeof(BANMASTER_IPOK) &&
 				  mem_comp(Packet.m_pData, BANMASTER_IPOK, sizeof(BANMASTER_IPOK)) == 0 &&
 				  m_NetServer.BanmasterCheck(&Packet.m_Address) != -1)
 				{
 				}
 
-				if(Packet.m_DataSize >= sizeof(BANMASTER_IPBAN) &&
+				if((unsigned int)Packet.m_DataSize >= sizeof(BANMASTER_IPBAN) &&
 				  mem_comp(Packet.m_pData, BANMASTER_IPBAN, sizeof(BANMASTER_IPBAN)) == 0 &&
 				  g_Config.m_SvGlobalBantime &&
 				  m_NetServer.BanmasterCheck(&Packet.m_Address) != -1)
