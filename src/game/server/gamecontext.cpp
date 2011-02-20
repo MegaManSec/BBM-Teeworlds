@@ -232,7 +232,7 @@ void CGameContext::SendChat(int ChatterClientID, int Team, const char *pText)
 			Msg.m_ClientID = ChatterClientID;
 			Msg.m_pMessage = pText;
 			Server()->SendPackMsg(&Msg, MSGFLAG_VITAL|MSGFLAG_NOSEND, -1);
-			if(ChatterClientID >= 0)
+			if(ChatterClientID != -1)
 			{
 			for(int i = 0; i < MAX_CLIENTS; i++)
 					{
@@ -246,23 +246,6 @@ void CGameContext::SendChat(int ChatterClientID, int Team, const char *pText)
 				Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, -1);
 			}
 		}
-	else
-	{
-		CNetMsg_Sv_Chat Msg;
-		Msg.m_Team = 1;
-		Msg.m_ClientID = ChatterClientID;
-		Msg.m_pMessage = pText;
-		
-		// pack one for the recording only
-		Server()->SendPackMsg(&Msg, MSGFLAG_VITAL|MSGFLAG_NOSEND, -1);
-
-		// send to the clients
-		for(int i = 0; i < MAX_CLIENTS; i++)
-		{
-			if(m_apPlayers[i] && m_apPlayers[i]->GetTeam() == Team)
-				Server()->SendPackMsg(&Msg, MSGFLAG_VITAL|MSGFLAG_NORECORD, i);
-		}
-	}
 }
 
 void CGameContext::SendEmoticon(int ClientID, int Emoticon)
@@ -633,11 +616,6 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 				else if(!str_comp_nocase(HandleArguments((char *)pMsg->m_pMessage), Server()->ClientName(ClientID)))
 				{
 					SendChatTarget(ClientID, "You Can't Ignore Yourself!");
-					return;
-				}
-				else if(str_comp_nocase(HandleArguments((char *)pMsg->m_pMessage), Server()->ClientName(i)))
-				{
-					SendChatTarget(ClientID, "No Such Player!");
 					return;
 				}
 			}

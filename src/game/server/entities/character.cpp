@@ -438,7 +438,7 @@ void CCharacter::FireWeapon()
 		case WEAPON_NINJA:
 		{
 			if (m_pPlayer->Skills[PUP_EPICNINJA]) {
-				if ((lastepicninja + 10 * Server()->TickSpeed()) < Server()->Tick()) {
+				if ((lastepicninja + 10 * Server()->TickSpeed()) <= Server()->Tick()) {
 					lastepicninja=Server()->Tick();
 					epicninjaoldpos=m_Pos;
 					epicninjaannounced=0;
@@ -794,7 +794,7 @@ void CCharacter::Tick()
                        }
                        else
                        {
-				if (m_pPlayer->Skills[tmp] < 10) {
+				if (m_pPlayer->Skills[tmp] < g_Config.m_MaxPowerUps) {
 				    m_pPlayer->Skills[tmp]++;
 				    TellPowerUpInfo(m_pPlayer->GetCID(), tmp);
 				}
@@ -953,6 +953,7 @@ bool CCharacter::IncreaseArmor(int Amount)
 
 bool CCharacter::Freeze(int ticks)
 {
+	m_Ninja.m_CurrentMoveTime=-1;
        if (ticks <= 1) return false;
        if (frz_tick > 0) { //already frozen
                if (frz_tick + REFREEZE_INTERVAL_TICKS > Server()->Tick()) return true;
@@ -972,10 +973,11 @@ bool CCharacter::Freeze(int ticks)
        return true;
 }
 
-bool CCharacter::Unfreeze(){
+bool CCharacter::Unfreeze()
+{
+	m_Ninja.m_CurrentMoveTime=-1;//prevent magic teleport when unfreezing while epic ninja
        if (frz_time > 0) {
                frz_tick = frz_time = frz_start = 0;
-               m_Ninja.m_CurrentMoveTime=-1;//prevent magic teleport when unfreezing while epic ninja
                m_aWeapons[WEAPON_NINJA].m_Got = false;
                if (m_LastWeapon < 0 || m_LastWeapon >= NUM_WEAPONS || m_LastWeapon  == WEAPON_NINJA || (!m_aWeapons[m_LastWeapon].m_Got)) m_LastWeapon = WEAPON_HAMMER;
                SetWeapon(m_LastWeapon);
