@@ -72,7 +72,7 @@ public:
 	int m_Last_ChangeInfo;
 	int m_Last_Emote;
 	int m_Last_Kill;
-	bool m_Muted;
+	int m_Muted;
 	int m_MuteTimes;
 	char m_LastChatText[256];
 	int m_LastChatTime;

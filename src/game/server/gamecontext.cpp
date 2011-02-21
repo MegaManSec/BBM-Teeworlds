@@ -591,7 +591,7 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 			pMessage++;
 		}
 		CCharacter* pChr = pPlayer->GetCharacter();
-		if(m_apPlayers[ChatterClientID]->m_Muted == 0)
+		if(m_apPlayers[ClientID]->m_Muted == 0)
 		{
 		if(!str_comp_num(pMsg->m_pMessage, "/ignore", 7))
 		{
