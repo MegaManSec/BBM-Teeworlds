@@ -746,11 +746,11 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 		SendChat(ClientID, Team, pMsg->m_pMessage);
 		pPlayer->m_LastChatTime = Server()->Tick();
 		str_copy(pPlayer->m_LastChatText, pMsg->m_pMessage, sizeof(pPlayer->m_LastChatText));
-		pPlayer->m_MuteTimes + 2;
+		pPlayer->m_MuteTimes = pPlayer->m_MuteTimes + 2;
 		}
 		if(pPlayer->m_MuteTimes == 10)
 		{
-			pPlayer->m_Muted == Server()->TickSpeed();
+			pPlayer->m_Muted = Server()->TickSpeed();
 			char aBuf[256];
 			str_format(aBuf, sizeof(aBuf), "You Are Muted For %d Seconds", m_apPlayers[ClientID]->m_Muted);
 			SendChatTarget(ClientID, aBuf);
