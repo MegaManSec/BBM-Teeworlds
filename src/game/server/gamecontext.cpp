@@ -226,27 +226,32 @@ void CGameContext::SendChat(int ChatterClientID, int Team, const char *pText)
 	Console()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "chat", aBuf);
 
 	if(Team == CHAT_ALL)
-		{
-			CNetMsg_Sv_Chat Msg;
-			Msg.m_Team = 0;
-			Msg.m_ClientID = ChatterClientID;
-			Msg.m_pMessage = pText;
-			Server()->SendPackMsg(&Msg, MSGFLAG_VITAL|MSGFLAG_NOSEND, -1);
-			if(ChatterClientID != -1)
-			{
-			for(int i = 0; i < MAX_CLIENTS; i++)
-					{
+	{
+		CNetMsg_Sv_Chat Msg;
+		Msg.m_Team = 0;
+		Msg.m_ClientID = ChatterClientID;
+		Msg.m_pMessage = pText;
+		Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, -1);
+	}
+	else
+	{
+		CNetMsg_Sv_Chat Msg;
+		Msg.m_Team = 1;
+		Msg.m_ClientID = ChatterClientID;
+		Msg.m_pMessage = pText;
+		
+		// pack one for the recording only
+		Server()->SendPackMsg(&Msg, MSGFLAG_VITAL|MSGFLAG_NOSEND, -1);
 
-						if(m_apPlayers[i] && m_apPlayers[i]->GetIgnored(ChatterClientID) == 0)
-							Server()->SendPackMsg(&Msg, MSGFLAG_VITAL|MSGFLAG_NORECORD, i);
-					}
-			}
-			else
-			{
-				Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, -1);
-			}
+		// send to the clients
+		for(int i = 0; i < MAX_CLIENTS; i++)
+		{
+			if(m_apPlayers[i] && m_apPlayers[i]->GetTeam() == Team)
+				Server()->SendPackMsg(&Msg, MSGFLAG_VITAL|MSGFLAG_NORECORD, i);
 		}
+	}
 }
+
 
 void CGameContext::SendEmoticon(int ClientID, int Emoticon)
 {
@@ -593,41 +598,7 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 		CCharacter* pChr = pPlayer->GetCharacter();
 		if(m_apPlayers[ClientID]->m_Muted == 0)
 		{
-		if(!str_comp_num(pMsg->m_pMessage, "/ignore", 7))
-		{
-			char aBuf[256];
-			if(HandleArguments((char *)pMsg->m_pMessage))
-			{
-			for(int i = 0; i < MAX_CLIENTS; ++i)
-			{
-				if(!str_comp_nocase(HandleArguments((char *)pMsg->m_pMessage), Server()->ClientName(i)) && str_comp_nocase(HandleArguments((char *)pMsg->m_pMessage), Server()->ClientName(ClientID)))
-				{
-					if(m_apPlayers[ClientID]->GetIgnored(i) == 0)
-					{
-						m_apPlayers[ClientID]->SetIgnorance(i, 1);
-						str_format(aBuf, sizeof(aBuf), "%s Ignored", Server()->ClientName(i));
-						SendChatTarget(ClientID, aBuf);
-					}
-					else if(m_apPlayers[ClientID]->GetIgnored(i) == 1)
-					{
-						str_format(aBuf, sizeof(aBuf), "%s UnIgnored", Server()->ClientName(i));
-						m_apPlayers[ClientID]->SetIgnorance(i, 0);
-						SendChatTarget(ClientID, aBuf);
-					}
-				}
-				else if(!str_comp_nocase(HandleArguments((char *)pMsg->m_pMessage), Server()->ClientName(ClientID)))
-				{
-					SendChatTarget(ClientID, "You Can't Ignore Yourself!");
-					return;
-				}
-			}
-			}
-			else
-			{
-				SendChatTarget(ClientID, "/ignore Is Used Like This: /ignore PERSONSNAME - Use trunk too auto-tab their user-name.");
-			}
-		}
-		else if(!str_comp_num(pMsg->m_pMessage, "/emote", 6))
+		if(!str_comp_num(pMsg->m_pMessage, "/emote", 6))
 		{
 			if (!str_comp_nocase(HandleArguments((char *)pMsg->m_pMessage), "normal"))
 			{
@@ -728,13 +699,14 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 		else if(!str_comp_num(pMsg->m_pMessage, "/", 1))
 		SendChatTarget(ClientID, "Invalid command! do /info");
 		else
+		{	
 		if(pPlayer->m_LastChatTime + Server()->TickSpeed() >= Server()->Tick() || str_comp_nocase(pMsg->m_pMessage, pPlayer->m_LastChatText) != 0)
 		{
 		SendChat(ClientID, Team, pMsg->m_pMessage);
 		str_copy(pPlayer->m_LastChatText, pMsg->m_pMessage, sizeof(pPlayer->m_LastChatText));
 		pPlayer->m_LastChatTime = Server()->Tick();
 		}
-		else if(pPlayer->m_LastChatTime + Server()->TickSpeed() < Server()->Tick() || str_comp_nocase(pMsg->m_pMessage, pPlayer->m_LastChatText) == 0)
+		else if(pPlayer->m_LastChatTime + Server()->TickSpeed() * 3 < Server()->Tick() || str_comp_nocase(pMsg->m_pMessage, pPlayer->m_LastChatText) == 0)
 		{
 			SendChat(ClientID, Team, pMsg->m_pMessage);
 			pPlayer->m_LastChatTime = Server()->Tick();
@@ -750,14 +722,15 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 		}
 		if(pPlayer->m_MuteTimes == 10)
 		{
-			pPlayer->m_Muted = Server()->TickSpeed();
+			pPlayer->m_Muted = Server()->TickSpeed() * 60;
 			char aBuf[256];
-			str_format(aBuf, sizeof(aBuf), "You Are Muted For %d Seconds", m_apPlayers[ClientID]->m_Muted);
+			str_format(aBuf, sizeof(aBuf), "You Are Muted For %d Seconds", m_apPlayers[ClientID]->m_Muted / Server()->TickSpeed());
 			SendChatTarget(ClientID, aBuf);
-			str_format(aBuf, sizeof(aBuf), "%s Is Muted For %d Seconds", Server()->ClientName(ClientID), m_apPlayers[ClientID]->m_Muted);
+			str_format(aBuf, sizeof(aBuf), "%s Is Muted For %d Seconds", Server()->ClientName(ClientID), m_apPlayers[ClientID]->m_Muted / Server()->TickSpeed());
 			SendChat(-1, CGameContext::CHAT_ALL, aBuf);
+			pPlayer->m_MuteTimes = 0;
 		}
-		
+		}
 		}
 		else
 		{
