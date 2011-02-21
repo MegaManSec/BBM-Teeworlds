@@ -11,6 +11,7 @@ IServer *CPlayer::Server() const { return m_pGameServer->Server(); }
 	
 CPlayer::CPlayer(CGameContext *pGameServer, int ClientID, int Team)
 {
+	m_Muted = 0;
 	m_pGameServer = pGameServer;
 	m_RespawnTick = Server()->Tick();
 	m_DieTick = Server()->Tick();
@@ -38,6 +39,10 @@ void CPlayer::Tick()
 
 	Server()->SetClientScore(m_ClientID, m_Score);
 
+	if(m_Muted != 0)
+	{
+		m_Muted--;
+	}
 	// do latency stuff
 	{
 		IServer::CClientInfo Info;

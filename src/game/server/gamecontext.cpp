@@ -591,6 +591,8 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 			pMessage++;
 		}
 		CCharacter* pChr = pPlayer->GetCharacter();
+		if(m_apPlayers[ChatterClientID]->m_Muted == 0)
+		{
 		if(!str_comp_num(pMsg->m_pMessage, "/ignore", 7))
 		{
 			char aBuf[256];
@@ -726,7 +728,44 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 		else if(!str_comp_num(pMsg->m_pMessage, "/", 1))
 		SendChatTarget(ClientID, "Invalid command! do /info");
 		else
+		if(pPlayer->m_LastChatTime + Server()->TickSpeed() >= Server()->Tick() || str_comp_nocase(pMsg->m_pMessage, pPlayer->m_LastChatText) != 0)
+		{
 		SendChat(ClientID, Team, pMsg->m_pMessage);
+		str_copy(pPlayer->m_LastChatText, pMsg->m_pMessage, sizeof(pPlayer->m_LastChatText));
+		pPlayer->m_LastChatTime = Server()->Tick();
+		}
+		else if(pPlayer->m_LastChatTime + Server()->TickSpeed() < Server()->Tick() || str_comp_nocase(pMsg->m_pMessage, pPlayer->m_LastChatText) == 0)
+		{
+			SendChat(ClientID, Team, pMsg->m_pMessage);
+			pPlayer->m_LastChatTime = Server()->Tick();
+			str_copy(pPlayer->m_LastChatText, pMsg->m_pMessage, sizeof(pPlayer->m_LastChatText));
+			pPlayer->m_MuteTimes++;
+		}
+		else
+		{
+		SendChat(ClientID, Team, pMsg->m_pMessage);
+		pPlayer->m_LastChatTime = Server()->Tick();
+		str_copy(pPlayer->m_LastChatText, pMsg->m_pMessage, sizeof(pPlayer->m_LastChatText));
+		pPlayer->m_MuteTimes + 2;
+		}
+		if(pPlayer->m_MuteTimes == 10)
+		{
+			pPlayer->m_Muted == Server()->TickSpeed();
+			char aBuf[256];
+			str_format(aBuf, sizeof(aBuf), "You Are Muted For %d Seconds", m_apPlayers[ClientID]->m_Muted);
+			SendChatTarget(ClientID, aBuf);
+			str_format(aBuf, sizeof(aBuf), "%s Is Muted For %d Seconds", Server()->ClientName(ClientID), m_apPlayers[ClientID]->m_Muted);
+			SendChat(-1, CGameContext::CHAT_ALL, aBuf);
+		}
+		
+		}
+		else
+		{
+			char aBuf[256];
+			str_format(aBuf, sizeof(aBuf), "You Can't Talk You Are Muted For Next %d Seconds", m_apPlayers[ClientID]->m_Muted);
+			SendChatTarget(ClientID, aBuf);
+		}
+		
 	}
 	else if(MsgID == NETMSGTYPE_CL_CALLVOTE)
 	{
