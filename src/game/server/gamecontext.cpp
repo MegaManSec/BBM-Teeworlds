@@ -735,7 +735,7 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 		else
 		{
 			char aBuf[256];
-			str_format(aBuf, sizeof(aBuf), "You Can't Talk You Are Muted For Next %d Seconds", m_apPlayers[ClientID]->m_Muted);
+			str_format(aBuf, sizeof(aBuf), "You Can't Talk You Are Muted For Next %d Seconds", m_apPlayers[ClientID]->m_Muted / Server()->TickSpeed());
 			SendChatTarget(ClientID, aBuf);
 		}
 		
