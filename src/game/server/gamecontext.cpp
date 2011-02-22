@@ -692,13 +692,6 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 				str_copy(pPlayer->m_LastChatText, pMsg->m_pMessage, sizeof(pPlayer->m_LastChatText));
 				pPlayer->m_LastChatTime = Server()->Tick();
 			}
-			else if(pPlayer->m_LastChatTime + Server()->TickSpeed() * 3 < Server()->Tick() || str_comp_nocase(pMsg->m_pMessage, pPlayer->m_LastChatText) == 0)
-			{
-				SendChat(ClientID, Team, pMsg->m_pMessage);
-				pPlayer->m_LastChatTime = Server()->Tick();
-				str_copy(pPlayer->m_LastChatText, pMsg->m_pMessage, sizeof(pPlayer->m_LastChatText));
-				pPlayer->m_MuteTimes++;
-			}
 			else
 			{
 				SendChat(ClientID, Team, pMsg->m_pMessage);
