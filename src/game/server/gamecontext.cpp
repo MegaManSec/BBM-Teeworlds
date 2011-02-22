@@ -638,10 +638,10 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 		}
 		else if(!str_comp_nocase(pMsg->m_pMessage, "/info"))
 		{
-		SendChatTarget(ClientID, "****Mod by \"[BBM]Julian->Assange\" and some great help by \"Learath2\" <3****");
-		SendChatTarget(ClientID, "Commands: /emote , /powerups , /colors and /ignore.");
-		SendChatTarget(ClientID, "Ignore: Ignore sombody by doing this: /ignore PERSONSNAME - Use trunk client too auto-tab there user-name.");
-		SendChatTarget(ClientID, "Colors ; use /Colors too see what colors you are immune to 1 means you are immune 0 means you are not.");
+			SendChatTarget(ClientID, "****Mod by \"[BBM]Julian->Assange\" and some great help by \"Learath2\" <3****");
+			SendChatTarget(ClientID, "Commands: /emote , /powerups , /colors and /ignore.");
+			SendChatTarget(ClientID, "Ignore: Ignore sombody by doing this: /ignore PERSONSNAME - Use trunk client too auto-tab there user-name.");
+			SendChatTarget(ClientID, "Colors ; use /Colors too see what colors you are immune to 1 means you are immune 0 means you are not.");
 		}
 		else if(!str_comp_nocase(pMsg->m_pMessage, "/powerups"))
 		{
@@ -650,8 +650,8 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 			char PUP_NAME[8][32]= {"Jump", "Hammer", "Plus Enemy Freeze Time", "Minus Self Freeze Time", "Hook Duration", "Hook Length", "Run", "Epic Ninja"};
 			for(int i = 0; i < NUM_PUPS; i++)
 			{
-					str_format(aBuf, sizeof(aBuf), "%s : %d", PUP_NAME[i], pPlayer->Skills[i]);
-					SendChatTarget(ClientID, aBuf);
+				str_format(aBuf, sizeof(aBuf), "%s : %d", PUP_NAME[i], pPlayer->Skills[i]);
+				SendChatTarget(ClientID, aBuf);
 			}
 			SendChatTarget(ClientID, "**************************");
 			return;
@@ -664,81 +664,66 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 			for(int i = 0; i < 7; i++)
 			{
 				if(i == 0)
-				{
 					str_format(aBuf, sizeof(aBuf), "%s : %d", PUP_NAME[i], pPlayer->m_NoGreen);
-				}
 				if(i == 1)
-				{
 					str_format(aBuf, sizeof(aBuf), "%s : %d", PUP_NAME[i], pPlayer->m_NoBlue);
-				}
 				if(i == 2)
-				{
 					str_format(aBuf, sizeof(aBuf), "%s : %d", PUP_NAME[i], pPlayer->m_NoRed);
-				}
 				if(i == 3)
-				{
 					str_format(aBuf, sizeof(aBuf), "%s : %d", PUP_NAME[i], pPlayer->m_NoPink);
-				}
 				if(i == 4)
-				{
 					str_format(aBuf, sizeof(aBuf), "%s : %d", PUP_NAME[i], pPlayer->m_NoGrey);
-				}
 				if(i == 5)
-				{
 					str_format(aBuf, sizeof(aBuf), "%s : %d", PUP_NAME[i], pPlayer->m_NoWhite);
-				}
 				if(i == 6)
-				{
 					str_format(aBuf, sizeof(aBuf), "%s : %d", PUP_NAME[i], pPlayer->m_NoYellow);
-				}
 					SendChatTarget(ClientID, aBuf);
 			}
 			SendChatTarget(ClientID, "*************************");
 			return;
 		}
 		else if(!str_comp_num(pMsg->m_pMessage, "/", 1))
-		SendChatTarget(ClientID, "Invalid command! do /info");
+			SendChatTarget(ClientID, "Invalid command! do /info");
 		else
 		{	
-		if(pPlayer->m_LastChatTime + Server()->TickSpeed() >= Server()->Tick() || str_comp_nocase(pMsg->m_pMessage, pPlayer->m_LastChatText) != 0)
-		{
-		SendChat(ClientID, Team, pMsg->m_pMessage);
-		str_copy(pPlayer->m_LastChatText, pMsg->m_pMessage, sizeof(pPlayer->m_LastChatText));
-		pPlayer->m_LastChatTime = Server()->Tick();
+			if(pPlayer->m_LastChatTime + Server()->TickSpeed() >= Server()->Tick() || str_comp_nocase(pMsg->m_pMessage, pPlayer->m_LastChatText) != 0)
+			{
+				SendChat(ClientID, Team, pMsg->m_pMessage);
+				str_copy(pPlayer->m_LastChatText, pMsg->m_pMessage, sizeof(pPlayer->m_LastChatText));
+				pPlayer->m_LastChatTime = Server()->Tick();
+			}
+			else if(pPlayer->m_LastChatTime + Server()->TickSpeed() * 3 < Server()->Tick() || str_comp_nocase(pMsg->m_pMessage, pPlayer->m_LastChatText) == 0)
+			{
+				SendChat(ClientID, Team, pMsg->m_pMessage);
+				pPlayer->m_LastChatTime = Server()->Tick();
+				str_copy(pPlayer->m_LastChatText, pMsg->m_pMessage, sizeof(pPlayer->m_LastChatText));
+				pPlayer->m_MuteTimes++;
+			}
+			else
+			{
+				SendChat(ClientID, Team, pMsg->m_pMessage);
+				pPlayer->m_LastChatTime = Server()->Tick();
+				str_copy(pPlayer->m_LastChatText, pMsg->m_pMessage, sizeof(pPlayer->m_LastChatText));
+				pPlayer->m_MuteTimes = pPlayer->m_MuteTimes + 2;
+			}
+			if(pPlayer->m_MuteTimes == 10)
+			{
+				pPlayer->m_Muted = Server()->TickSpeed() * 60;
+				char aBuf[256];
+				str_format(aBuf, sizeof(aBuf), "You Are Muted For %d Seconds", m_apPlayers[ClientID]->m_Muted / Server()->TickSpeed());
+				SendChatTarget(ClientID, aBuf);
+				str_format(aBuf, sizeof(aBuf), "%s Is Muted For %d Seconds", Server()->ClientName(ClientID), m_apPlayers[ClientID]->m_Muted / Server()->TickSpeed());
+				SendChat(-1, CGameContext::CHAT_ALL, aBuf);
+				pPlayer->m_MuteTimes = 0;
+			}
 		}
-		else if(pPlayer->m_LastChatTime + Server()->TickSpeed() * 3 < Server()->Tick() || str_comp_nocase(pMsg->m_pMessage, pPlayer->m_LastChatText) == 0)
-		{
-			SendChat(ClientID, Team, pMsg->m_pMessage);
-			pPlayer->m_LastChatTime = Server()->Tick();
-			str_copy(pPlayer->m_LastChatText, pMsg->m_pMessage, sizeof(pPlayer->m_LastChatText));
-			pPlayer->m_MuteTimes++;
-		}
-		else
-		{
-		SendChat(ClientID, Team, pMsg->m_pMessage);
-		pPlayer->m_LastChatTime = Server()->Tick();
-		str_copy(pPlayer->m_LastChatText, pMsg->m_pMessage, sizeof(pPlayer->m_LastChatText));
-		pPlayer->m_MuteTimes = pPlayer->m_MuteTimes + 2;
-		}
-		if(pPlayer->m_MuteTimes == 10)
-		{
-			pPlayer->m_Muted = Server()->TickSpeed() * 60;
-			char aBuf[256];
-			str_format(aBuf, sizeof(aBuf), "You Are Muted For %d Seconds", m_apPlayers[ClientID]->m_Muted / Server()->TickSpeed());
-			SendChatTarget(ClientID, aBuf);
-			str_format(aBuf, sizeof(aBuf), "%s Is Muted For %d Seconds", Server()->ClientName(ClientID), m_apPlayers[ClientID]->m_Muted / Server()->TickSpeed());
-			SendChat(-1, CGameContext::CHAT_ALL, aBuf);
-			pPlayer->m_MuteTimes = 0;
-		}
-		}
-		}
-		else
+	}
+	else
 		{
 			char aBuf[256];
 			str_format(aBuf, sizeof(aBuf), "You Can't Talk You Are Muted For Next %d Seconds", m_apPlayers[ClientID]->m_Muted / Server()->TickSpeed());
 			SendChatTarget(ClientID, aBuf);
 		}
-		
 	}
 	else if(MsgID == NETMSGTYPE_CL_CALLVOTE)
 	{
