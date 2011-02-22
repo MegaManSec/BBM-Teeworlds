@@ -506,7 +506,8 @@ void CGameContext::OnClientEnter(int ClientID)
 	str_format(aBuf, sizeof(aBuf), "'%s' entered and joined the %s", Server()->ClientName(ClientID), m_pController->GetTeamName(m_apPlayers[ClientID]->GetTeam()));
 	SendChat(-1, CGameContext::CHAT_ALL, aBuf); 
 	SendChatTarget(ClientID, "BBMod Made by [BBM]Julian->Assange And Some Great Helps By [BBM]Learath2");
-	SendChatTarget(ClientID, "For Commands And Their Usages do /info");
+	if(g_Config.m_SvWelcome[0]!=0)
+	SendChatTarget(ClientID,g_Config.m_SvWelcome);
 
 	str_format(aBuf, sizeof(aBuf), "team_join player='%d:%s' team=%d", ClientID, Server()->ClientName(ClientID), m_apPlayers[ClientID]->GetTeam());
 	Console()->Print(IConsole::OUTPUT_LEVEL_DEBUG, "game", aBuf);
@@ -556,7 +557,6 @@ void CGameContext::OnClientDrop(int ClientID)
 
 char * CGameContext::HandleArguments(char *pString)
 {
-
 	return str_skip_whitespaces(str_skip_to_whitespace(pString));
 }
 
