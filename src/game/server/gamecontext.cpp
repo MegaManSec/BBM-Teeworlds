@@ -596,39 +596,34 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 			pMessage++;
 		}
 		CCharacter* pChr = pPlayer->GetCharacter();
-		if(m_apPlayers[ClientID]->m_Muted == 0)
+		if(m_apPlayers[ClientID]->m_Muted == 0 && !m_World.m_Paused)
 		{
-		if(!str_comp_num(pMsg->m_pMessage, "/emote", 6))
+		if(!str_comp_num(pMsg->m_pMessage, "/emote", 6) && !m_World.m_Paused && pChr && pPlayer)
 		{
+			pChr->m_DefEmoteReset = 0;
 			if (!str_comp_nocase(HandleArguments((char *)pMsg->m_pMessage), "normal"))
 			{
-				pChr->SetEmoteType(EMOTE_NORMAL);
-				pChr->SetEmoteStop(Server()->Tick() + 9 * Server()->TickSpeed() * 999999 + Server()->TickSpeed() * (950478^995));
+				pChr->m_DefEmote =(EMOTE_NORMAL);
 			}
 			else if (!str_comp_nocase(HandleArguments((char *)pMsg->m_pMessage), "surprise"))
 			{
-				pChr->SetEmoteType(EMOTE_SURPRISE);
-				pChr->SetEmoteStop(Server()->Tick() + 9 * Server()->TickSpeed() * 999999 + Server()->TickSpeed() * (950478^995));
+				pChr->m_DefEmote =(EMOTE_SURPRISE);
 			}
 			else if (!str_comp_nocase(HandleArguments((char *)pMsg->m_pMessage), "happy"))
 			{
-				pChr->SetEmoteType(EMOTE_HAPPY);
-				pChr->SetEmoteStop(Server()->Tick() + 9 * Server()->TickSpeed() * 999999 + Server()->TickSpeed() * (950478^995));
+				pChr->m_DefEmote =(EMOTE_HAPPY);
 			}
 			else if (!str_comp_nocase(HandleArguments((char *)pMsg->m_pMessage), "pain"))
 			{
-				pChr->SetEmoteType(EMOTE_PAIN);
-				pChr->SetEmoteStop(Server()->Tick() + 9 * Server()->TickSpeed() * 999999 + Server()->TickSpeed() * (950478^995));
+				pChr->m_DefEmote =(EMOTE_PAIN);
 			}
 			else if (!str_comp_nocase(HandleArguments((char *)pMsg->m_pMessage), "blink"))
 			{
-				pChr->SetEmoteType(EMOTE_BLINK);
-				pChr->SetEmoteStop(Server()->Tick() + 9 * Server()->TickSpeed() * 999999 + Server()->TickSpeed() * (950478^995));
+				pChr->m_DefEmote =(EMOTE_BLINK);
 			}
 			else if (!str_comp_nocase(HandleArguments((char *)pMsg->m_pMessage), "angry"))
 			{
-				pChr->SetEmoteType(EMOTE_ANGRY);
-				pChr->SetEmoteStop(Server()->Tick() + 9 * Server()->TickSpeed() * 999999 + Server()->TickSpeed() * (950478^995));
+				pChr->m_DefEmote =(EMOTE_ANGRY);
 			}
 			else
 			{
@@ -947,6 +942,40 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 		pPlayer->m_Last_Emote = Server()->Tick();
 		
 		SendEmoticon(ClientID, pMsg->m_Emoticon);
+		CCharacter* pChr = pPlayer->GetCharacter();
+		if(pChr && pPlayer)
+		{
+			switch(pMsg->m_Emoticon)
+			{
+				case EMOTICON_2:
+				case EMOTICON_8:
+					pChr->SetEmoteType(EMOTE_SURPRISE);
+					break;
+				case EMOTICON_1:
+				case EMOTICON_4:
+				case EMOTICON_7:
+				case EMOTICON_13:
+					pChr->SetEmoteType(EMOTE_BLINK);
+					break;
+				case EMOTICON_3:
+				case EMOTICON_6:
+					pChr->SetEmoteType(EMOTE_HAPPY);
+					break;
+				case EMOTICON_9:
+				case EMOTICON_15:
+					pChr->SetEmoteType(EMOTE_PAIN);
+					break;
+				case EMOTICON_10:
+				case EMOTICON_11:
+				case EMOTICON_12:
+					pChr->SetEmoteType(EMOTE_ANGRY);
+					break;
+				default:
+					break;
+			}
+			pChr->SetEmoteStop(Server()->Tick() + 2 * Server()->TickSpeed());
+	
+		}
 	}
 	else if (MsgID == NETMSGTYPE_CL_KILL && !m_World.m_Paused)
 	{

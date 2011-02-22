@@ -76,6 +76,10 @@ public:
 	bool Freeze(int time);
 	bool Unfreeze();
 	void SetEmoteType(int EmoteType) { m_EmoteType = EmoteType; };
+	int m_EmoteStop;
+	int m_DefEmote;
+	int m_DefEmoteReset;
+	int ft;
 
 private:
 	void TellPowerUpInfo(int ClientID, int Skill);
@@ -85,7 +89,6 @@ private:
 	
 	bool m_Alive;
 	int m_EmoteType;
-	int m_EmoteStop;
 	// weapon info
 	CEntity *m_apHitObjects[10];
 	int m_NumObjectsHit;

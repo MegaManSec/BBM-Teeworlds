@@ -583,6 +583,7 @@ void CCharacter::Tick()
 		m_pPlayer->m_ForceBalanced = false;
 	}
         if (frz_time > 0) {
+	SetEmote(EMOTE_BLINK, Server()->Tick());
                 if (frz_time % (REFREEZE_INTERVAL_TICKS) == 0) {
 			GameServer()->CreateDamageInd(m_Pos, 0, frz_time / REFREEZE_INTERVAL_TICKS);
                 }
@@ -617,7 +618,7 @@ void CCharacter::Tick()
 	if (col == TILE_KICK) {
 		Server()->Kick(m_pPlayer->GetCID(), "Kicked by evil kick zone");
 	} else if (col == TILE_FREEZE || (col >= TILE_COLFRZ_GREEN && col <= TILE_COLFRZ_PINK)) {
-                int ft = Server()->TickSpeed() * 3;
+                ft = Server()->TickSpeed() * 3;
                 int add=0;
                 if ((wasout || frz_tick == 0) && (((lasthookedat + (Server()->TickSpeed()<<1)) > Server()->Tick()) || ((lasthammeredat + Server()->TickSpeed()) > Server()->Tick())))
                 {
@@ -953,9 +954,10 @@ bool CCharacter::IncreaseArmor(int Amount)
 
 bool CCharacter::Freeze(int ticks)
 {
-	m_Ninja.m_CurrentMoveTime=-1;
        if (ticks <= 1) return false;
-       if (frz_tick > 0) { //already frozen
+       if (frz_tick > 0)
+	{
+		//already frozen
                if (frz_tick + REFREEZE_INTERVAL_TICKS > Server()->Tick()) return true;
       } else {
                frz_start=Server()->Tick();
@@ -966,6 +968,7 @@ bool CCharacter::Freeze(int ticks)
        frz_time=ticks;
        m_Ninja.m_ActivationTick = Server()->Tick();
        m_aWeapons[WEAPON_NINJA].m_Got = true;
+
        m_aWeapons[WEAPON_NINJA].m_Ammo = -1;
        if (m_ActiveWeapon != WEAPON_NINJA) {
                SetWeapon(WEAPON_NINJA);
@@ -1074,7 +1077,10 @@ bool CCharacter::TakeDamage(vec2 Force, int Dmg, int From, int Weapon)
 	}*/
 
 	if (Weapon == WEAPON_NINJA)
-	Freeze(3 * Server()->TickSpeed());
+	{
+	Freeze(ft);
+	dbg_msg("ft","%d",ft);
+	}
 
 	/*if(Dmg)
 	{
@@ -1163,7 +1169,7 @@ void CCharacter::Snap(int SnappingClient)
 	// set emote
 	if (m_EmoteStop < Server()->Tick())
 	{
-		m_EmoteType = EMOTE_NORMAL;
+		m_EmoteType = m_DefEmote;
 		m_EmoteStop = -1;
 	}
 
@@ -1184,12 +1190,6 @@ void CCharacter::Snap(int SnappingClient)
 		pCharacter->m_Armor = m_Armor;
 		if(m_aWeapons[m_ActiveWeapon].m_Ammo > 0)
 			pCharacter->m_AmmoCount = m_aWeapons[m_ActiveWeapon].m_Ammo;
-	}
-
-	if(pCharacter->m_Emote == EMOTE_NORMAL)
-	{
-	//	if(250 - ((Server()->Tick() - m_LastAction)%(250)) < 5)
-	//		pCharacter->m_Emote = EMOTE_BLINK;
 	}
 
 	pCharacter->m_PlayerState = m_PlayerState;
