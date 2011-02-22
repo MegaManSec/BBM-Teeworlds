@@ -1132,62 +1132,74 @@ void CGameContext::ConVote(IConsole::IResult *pResult, void *pUserData)
 
 void CGameContext::ConPowerups(IConsole::IResult *pResult, void *pUserData)
 {
-	int cid = clamp(pResult->GetInteger(0), -1, 1);
 	CGameContext *pSelf = (CGameContext *)pUserData;
 	if(!str_comp_nocase(pResult->GetString(1), "hammer"))
 	{
-		if(pSelf->m_apPlayers[cid])
+		if(pSelf->m_apPlayers[pResult->GetInteger(0)])
 		{
-			pSelf->m_apPlayers[cid]->Skills[PUP_HAMMER] = pResult->GetInteger(2);
+			pSelf->m_apPlayers[pResult->GetInteger(0)]->Skills[PUP_HAMMER] = pResult->GetInteger(2);
 		}
 	}
 	if(!str_comp_nocase(pResult->GetString(1), "jump"))
 	{
-		if(pSelf->m_apPlayers[cid])
+		if(pSelf->m_apPlayers[pResult->GetInteger(0)])
 		{
-			pSelf->m_apPlayers[cid]->Skills[PUP_JUMP] = pResult->GetInteger(2);
+			pSelf->m_apPlayers[pResult->GetInteger(0)]->Skills[PUP_JUMP] = pResult->GetInteger(2);
 		}
 	}
 	if(!str_comp_nocase(pResult->GetString(1), "minusstar"))
 	{
-		if(pSelf->m_apPlayers[cid])
+		if(pSelf->m_apPlayers[pResult->GetInteger(0)])
 		{
-			pSelf->m_apPlayers[cid]->Skills[PUP_SFREEZE] = pResult->GetInteger(2);
+			pSelf->m_apPlayers[pResult->GetInteger(0)]->Skills[PUP_SFREEZE] = pResult->GetInteger(2);
 		}
 	}
 	if(!str_comp_nocase(pResult->GetString(1), "plusstar"))
 	{
-		if(pSelf->m_apPlayers[cid])
+		if(pSelf->m_apPlayers[pResult->GetInteger(0)])
 		{
-			pSelf->m_apPlayers[cid]->Skills[PUP_LFREEZE] = pResult->GetInteger(2);
+			pSelf->m_apPlayers[pResult->GetInteger(0)]->Skills[PUP_LFREEZE] = pResult->GetInteger(2);
 		}
 	}
 	if(!str_comp_nocase(pResult->GetString(1), "hookdur"))
 	{
-		if(pSelf->m_apPlayers[cid])
+		if(pSelf->m_apPlayers[pResult->GetInteger(0)])
 		{
-			pSelf->m_apPlayers[cid]->Skills[PUP_HOOKDUR] = pResult->GetInteger(2);
+			pSelf->m_apPlayers[pResult->GetInteger(0)]->Skills[PUP_HOOKDUR] = pResult->GetInteger(2);
 		}
 	}
 	if(!str_comp_nocase(pResult->GetString(1), "hooklen"))
 	{
-		if(pSelf->m_apPlayers[cid])
+		if(pSelf->m_apPlayers[pResult->GetInteger(0)])
 		{
-			pSelf->m_apPlayers[cid]->Skills[PUP_HOOKLEN] = pResult->GetInteger(2);
+			pSelf->m_apPlayers[pResult->GetInteger(0)]->Skills[PUP_HOOKLEN] = pResult->GetInteger(2);
 		}
 	}
 	if(!str_comp_nocase(pResult->GetString(1), "walkspd"))
 	{
-		if(pSelf->m_apPlayers[cid])
+		if(pSelf->m_apPlayers[pResult->GetInteger(0)])
 		{
-			pSelf->m_apPlayers[cid]->Skills[PUP_WALKSPD] = pResult->GetInteger(2);
+			pSelf->m_apPlayers[pResult->GetInteger(0)]->Skills[PUP_WALKSPD] = pResult->GetInteger(2);
 		}
 	}
 	if(!str_comp_nocase(pResult->GetString(1), "epicninja"))
 	{
-		if(pSelf->m_apPlayers[cid])
+		if(pSelf->m_apPlayers[pResult->GetInteger(0)])
 		{
-			pSelf->m_apPlayers[cid]->Skills[PUP_EPICNINJA] = pResult->GetInteger(2);
+			pSelf->m_apPlayers[pResult->GetInteger(0)]->Skills[PUP_EPICNINJA] = pResult->GetInteger(2);
+		}
+	}
+	if(!str_comp_nocase(pResult->GetString(1), "reset"))
+	{
+		if(pSelf->m_apPlayers[pResult->GetInteger(0)])
+		{
+			for(int i = 0; i < MAX_CLIENTS; ++i)
+			{
+				for(int i = 0; i < NUM_PUPS; i++)
+				{
+					m_apPlayers[pResult->GetInteger(0)]->Skills[i] = 0;
+				}
+			}
 		}
 	}
 	
