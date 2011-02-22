@@ -701,7 +701,7 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 			}
 			if(pPlayer->m_MuteTimes == 10)
 			{
-				pPlayer->m_Muted = Server()->TickSpeed() * 60;
+				pPlayer->m_Muted = Server()->TickSpeed() * g_Config.m_SvAutoMuteTime;
 				char aBuf[256];
 				str_format(aBuf, sizeof(aBuf), "You Are Muted For %d Seconds", m_apPlayers[ClientID]->m_Muted / Server()->TickSpeed());
 				SendChatTarget(ClientID, aBuf);
@@ -1197,7 +1197,7 @@ void CGameContext::ConPowerups(IConsole::IResult *pResult, void *pUserData)
 			{
 				for(int i = 0; i < NUM_PUPS; i++)
 				{
-					m_apPlayers[pResult->GetInteger(0)]->Skills[i] = 0;
+					pSelf->m_apPlayers[pResult->GetInteger(0)]->Skills[i] = 0;
 				}
 			}
 		}

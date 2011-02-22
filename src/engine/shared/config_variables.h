@@ -81,6 +81,7 @@ MACRO_CONFIG_INT(SvRconBantime, sv_rcon_bantime, 5, 0, 1440, CFGFLAG_SERVER, "Th
 MACRO_CONFIG_INT(SvGlobalBantime, sv_global_ban_time, 60, 0, 1440, CFGFLAG_SERVER, "The time a client gets banned if the ban server reports it. 0 to disable")
 MACRO_CONFIG_INT(MaxPowerUps, sv_max_powerups, 10, 0, 50, CFGFLAG_SERVER, "how many of 1 powerup u can have")
 MACRO_CONFIG_STR(SvWelcome, sv_welcome, 128, "Welcome too BBM server!", CFGFLAG_SERVER, "Welcome message")
+MACRO_CONFIG_INT(SvAutoMuteTime, sv_auto_mute_time, 60, 0, 1440, CFGFLAG_SERVER, "how many seconds the person gets when they get auto-muted")
 
 MACRO_CONFIG_INT(Debug, debug, 0, 0, 1, CFGFLAG_CLIENT|CFGFLAG_SERVER, "Debug mode")
 MACRO_CONFIG_INT(DbgStress, dbg_stress, 0, 0, 0, CFGFLAG_CLIENT|CFGFLAG_SERVER, "Stress systems")
