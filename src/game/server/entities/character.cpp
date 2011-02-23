@@ -984,15 +984,16 @@ bool CCharacter::Freeze(int ticks)
 bool CCharacter::Unfreeze()
 {
 	m_Ninja.m_CurrentMoveTime=-1;//prevent magic teleport when unfreezing while epic ninja
-       if (frz_time > 0) {
-               frz_tick = frz_time = frz_start = 0;
-               m_aWeapons[WEAPON_NINJA].m_Got = false;
-               if (m_LastWeapon < 0 || m_LastWeapon >= NUM_WEAPONS || m_LastWeapon  == WEAPON_NINJA || (!m_aWeapons[m_LastWeapon].m_Got)) m_LastWeapon = WEAPON_HAMMER;
-               SetWeapon(m_LastWeapon);
-               epicninjaannounced=0;
-               return true;
-       }
-       return false;
+	if (frz_time > 0)
+	{
+		frz_tick = frz_time = frz_start = 0;
+ 		m_aWeapons[WEAPON_NINJA].m_Got = false;
+		if (m_LastWeapon < 0 || m_LastWeapon >= NUM_WEAPONS || m_LastWeapon  == WEAPON_NINJA || (!m_aWeapons[m_LastWeapon].m_Got)) m_LastWeapon = WEAPON_HAMMER;
+		SetWeapon(m_LastWeapon);
+		epicninjaannounced=0;
+		return true;
+	}
+	return false;
 
 return true;
 }
@@ -1000,27 +1001,37 @@ return true;
 void CCharacter::TellPowerUpInfo(int ClientID, int Skill)
 {
 	static char bBuf[512];
-       switch(Skill) {
-               case PUP_JUMP:
-                       str_format(bBuf, 128, "you got an extra air jump!");break;
-               case PUP_HAMMER:
-                       str_format(bBuf, 128, "hammer powered!");break;
-               case PUP_LFREEZE:
-                       str_format(bBuf, 128, "enemy freeze time increased!");break;
-               case PUP_SFREEZE:
-                       str_format(bBuf, 128, "own freeze time shortened!");break;
-               case PUP_HOOKDUR:
-                       str_format(bBuf, 128, "hook duration increased (you wont see it but it works!)!");break;
-               case PUP_HOOKLEN:
-                       str_format(bBuf, 128, "hook length extended (its not smooth, however)");break;
-               case PUP_WALKSPD:
-                       str_format(bBuf, 128, "walk speed increased");break;
-               case PUP_EPICNINJA:
-                       str_format(bBuf, 128, "eeeeeeeeeeeeeeeeepic ninja! (freeze attack)");break;
-               default:
-                       str_format(bBuf, 128, "wtf");break;
-       }
-       GameServer()->SendChatTarget(ClientID, bBuf);
+	switch(Skill)
+	{
+		case PUP_JUMP:
+			str_format(bBuf, 128, "you got an extra air jump!");
+			break;
+		case PUP_HAMMER:
+			str_format(bBuf, 128, "hammer powered!");
+			break;
+		case PUP_LFREEZE:
+			str_format(bBuf, 128, "enemy freeze time increased!");
+			break;
+		case PUP_SFREEZE:
+			str_format(bBuf, 128, "own freeze time shortened!");
+			break;
+		case PUP_HOOKDUR:
+			str_format(bBuf, 128, "hook duration increased (you wont see it but it works!)!");
+			break;
+		case PUP_HOOKLEN:
+                       str_format(bBuf, 128, "hook length extended (its not smooth, however)");
+			break;
+		case PUP_WALKSPD:
+                       str_format(bBuf, 128, "walk speed increased");
+			break;
+		case PUP_EPICNINJA:
+                       str_format(bBuf, 128, "eeeeeeeeeeeeeeeeepic ninja! (freeze attack)");
+			break;
+		default:
+			str_format(bBuf, 128, "wtf");
+			break;
+	}
+	GameServer()->SendChatTarget(ClientID, bBuf);
 }
 
 void CCharacter::Die(int Killer, int Weapon)
@@ -1081,10 +1092,9 @@ bool CCharacter::TakeDamage(vec2 Force, int Dmg, int From, int Weapon)
 		GameServer()->CreateDamageInd(m_Pos, 0, Dmg);
 	}*/
 
-	if (Weapon == WEAPON_NINJA)
+	if(Weapon == WEAPON_NINJA)
 	{
-	Freeze(ft);
-	dbg_msg("ft","%d",ft);
+		Freeze(ft);
 	}
 
 	/*if(Dmg)
@@ -1141,11 +1151,11 @@ bool CCharacter::TakeDamage(vec2 Force, int Dmg, int From, int Weapon)
 		GameServer()->CreateSound(m_Pos, SOUND_PLAYER_PAIN_LONG);
 	else
 		GameServer()->CreateSound(m_Pos, SOUND_PLAYER_PAIN_SHORT);
-
+*/
 	m_EmoteType = EMOTE_PAIN;
 	m_EmoteStop = Server()->Tick() + 500 * Server()->TickSpeed() / 1000;
 	
-	*/return true;
+	return true;
 }
 
 void CCharacter::Snap(int SnappingClient)
