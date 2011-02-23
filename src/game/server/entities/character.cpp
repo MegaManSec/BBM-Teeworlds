@@ -574,6 +574,7 @@ void CCharacter::OnDirectInput(CNetObj_PlayerInput *pNewInput)
 
 void CCharacter::Tick()
 {
+	m_Armor=(frz_time >= 0)?10-(frz_time/15):0;
 	if(m_pPlayer->m_ForceBalanced)
 	{
 		char Buf[128];
@@ -954,26 +955,30 @@ bool CCharacter::IncreaseArmor(int Amount)
 
 bool CCharacter::Freeze(int ticks)
 {
-       if (ticks <= 1) return false;
-       if (frz_tick > 0)
+	if (ticks <= 1)
+	return false;
+	if (frz_tick > 0)//already frozen
 	{
-		//already frozen
-               if (frz_tick + REFREEZE_INTERVAL_TICKS > Server()->Tick()) return true;
-      } else {
-               frz_start=Server()->Tick();
-               epicninjaannounced=0;
-               lastepicninja=Server()->Tick()-5*Server()->TickSpeed();
-       }
-       frz_tick=Server()->Tick();
-       frz_time=ticks;
-       m_Ninja.m_ActivationTick = Server()->Tick();
-       m_aWeapons[WEAPON_NINJA].m_Got = true;
+		if (frz_tick + REFREEZE_INTERVAL_TICKS > Server()->Tick())
+		return true;
+      	}
+	else
+	{
+		frz_start=Server()->Tick();
+		epicninjaannounced=0;
+		lastepicninja=Server()->Tick()-5*Server()->TickSpeed();
+	}
+	frz_tick=Server()->Tick();
+	frz_time=ticks;
+	m_Ninja.m_ActivationTick = Server()->Tick();
+	m_aWeapons[WEAPON_NINJA].m_Got = true;
 
-       m_aWeapons[WEAPON_NINJA].m_Ammo = -1;
-       if (m_ActiveWeapon != WEAPON_NINJA) {
-               SetWeapon(WEAPON_NINJA);
-       }
-       return true;
+	m_aWeapons[WEAPON_NINJA].m_Ammo = -1;
+	if (m_ActiveWeapon != WEAPON_NINJA)
+	{
+		SetWeapon(WEAPON_NINJA);
+	}
+	return true;
 }
 
 bool CCharacter::Unfreeze()

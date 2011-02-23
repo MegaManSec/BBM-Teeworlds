@@ -23,8 +23,6 @@ public:
 	void SetTeam(int Team);
 	int GetTeam() const { return m_Team; };
 	int GetCID() const { return m_ClientID; };
-	int GetIgnored(int cid);
-	void SetIgnorance(int cid, bool enabled);
 	
 	void Tick();
 	void Snap(int SnappingClient);
@@ -109,7 +107,6 @@ private:
 	bool m_Spawning;
 	int m_ClientID;
 	int m_Team;
-	bool m_Ignored[MAX_CLIENTS];
 
 	// network latency calculations	
 	struct
