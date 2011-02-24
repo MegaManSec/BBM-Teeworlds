@@ -622,7 +622,7 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 			}
 			else if(!str_comp_nocase(pMsg->m_pMessage, "/info"))
 			{
-				SendChatTarget(ClientID, "****Mod by \"[BBM]Julian->Assange\" and some great help by \"Learath2\" <3****");
+				SendChatTarget(ClientID, "****Mod by \"[BBM]Julian->Assange\" And Some Great Helps By \"Learath2\" <3****");
 				SendChatTarget(ClientID, "Commands: /emote , /powerups , /colors");
 			}
 			else if(!str_comp_nocase(pMsg->m_pMessage, "/powerups"))
