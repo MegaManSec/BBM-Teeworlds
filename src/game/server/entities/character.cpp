@@ -574,7 +574,7 @@ void CCharacter::OnDirectInput(CNetObj_PlayerInput *pNewInput)
 
 void CCharacter::Tick()
 {
-ft = Server()->TickSpeed() * 3;
+		ft = Server()->TickSpeed() * 3;
                 int add=0;
                 if ((wasout || frz_tick == 0) && (((lasthookedat + (Server()->TickSpeed()<<1)) > Server()->Tick()) || ((lasthammeredat + Server()->TickSpeed()) > Server()->Tick())))
                 {
@@ -635,8 +635,8 @@ ft = Server()->TickSpeed() * 3;
 
        if (m_Core.m_HookedPlayer >= 0) {
                if (GameServer()->m_apPlayers[m_Core.m_HookedPlayer] && GameServer()->m_apPlayers[m_Core.m_HookedPlayer]->GetCharacter()) {
-                    //   GameServer()->m_apPlayers[m_Core.m_HookedPlayer]->GetCharacter()->lasthookedat = Server()->Tick();
-                     //  GameServer()->m_apPlayers[m_Core.m_HookedPlayer]->GetCharacter()->lasthookedby = m_pPlayer->GetCID();
+                       GameServer()->m_apPlayers[m_Core.m_HookedPlayer]->GetCharacter()->lasthookedat = Server()->Tick();
+                       GameServer()->m_apPlayers[m_Core.m_HookedPlayer]->GetCharacter()->lasthookedby = m_pPlayer->GetCID();
               }
        }
 
