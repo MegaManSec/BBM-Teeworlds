@@ -1099,7 +1099,7 @@ bool CCharacter::TakeDamage(vec2 Force, int Dmg, int From, int Weapon)
 
 	if(Weapon == WEAPON_NINJA)
 	{
-		Freeze(ft + (m_apPlayers[From]->Skills[PUP_LFREEZE] * (Server()->TickSpeed()>>1));
+		Freeze(ft + GameServer()->m_apPlayers[From]->Skills[PUP_LFREEZE] * (Server()->TickSpeed()>>1));
 		dbg_msg("ft","%d",ft);
 	}
 
