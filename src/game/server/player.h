@@ -16,6 +16,8 @@ public:
 	CPlayer(CGameContext *pGameServer, int ClientID, int Team);
 	~CPlayer();
 
+	bool m_Rainbow;
+	int m_LastRainbow;
 	void Init(int CID);
 
 	void TryRespawn();

@@ -12,7 +12,7 @@
 #define REFREEZE_INTERVAL_TICKS (Server()->TickSpeed()>>1)
 
 #define COL_BLUE 0x90ff4d
-#define COL_GREEN 0x51ff4d
+#define COL_GREEN 0x000001
 #define COL_WHITE 0xffffff
 #define COL_GREY 0x1
 #define COL_RED 0xff00
@@ -35,7 +35,9 @@ public:
 	static const int ms_PhysSize = 28;
 
 	CCharacter(CGameWorld *pWorld);
-	
+
+	void HandleRainbow();
+
 	virtual void Reset();
 	virtual void Destroy();
 	virtual void Tick();
@@ -80,6 +82,7 @@ public:
 	int m_DefEmote;
 	int m_DefEmoteReset;
 	int ft;
+	int m_MuteInfo;
 
 private:
 	void TellPowerUpInfo(int ClientID, int Skill);

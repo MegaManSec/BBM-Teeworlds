@@ -574,6 +574,12 @@ void CCharacter::OnDirectInput(CNetObj_PlayerInput *pNewInput)
 
 void CCharacter::Tick()
 {
+	if(m_MuteInfo + Server()->TickSpeed() * 90 <= Server()->Tick())
+	{
+		// m_pPlayer->m_MuteTimes = 0;
+		dbg_msg("l0l","l0l");
+		m_MuteInfo = Server()->Tick();
+	}
 	m_Armor=(frz_time >= 0)?10-(frz_time/15):0;
 	if(m_pPlayer->m_ForceBalanced)
 	{
