@@ -505,7 +505,7 @@ void CGameContext::OnClientEnter(int ClientID)
 	char aBuf[512];
 	str_format(aBuf, sizeof(aBuf), "'%s' entered and joined the %s", Server()->ClientName(ClientID), m_pController->GetTeamName(m_apPlayers[ClientID]->GetTeam()));
 	SendChat(-1, CGameContext::CHAT_ALL, aBuf); 
-	SendChatTarget(ClientID, "BBMod Made by [BBM]Julian->Assange And Some Great Helps By [BBM]Learath2");
+	SendChatTarget(ClientID, "BBMod Made by [BBM]Julian->Assange And [BBM]Learath2");
 	if(g_Config.m_SvWelcome[0]!=0)
 	SendChatTarget(ClientID,g_Config.m_SvWelcome);
 
@@ -622,7 +622,7 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 			}
 			else if(!str_comp_nocase(pMsg->m_pMessage, "/info"))
 			{
-				SendChatTarget(ClientID, "****Mod by \"[BBM]Julian->Assange\" and some great help by \"Learath2\" <3****");
+				SendChatTarget(ClientID, "****Mod by \"[BBM]Julian->Assange\" And  \"Learath2\" <3****");
 				SendChatTarget(ClientID, "Commands: /emote , /powerups , /colors");
 			}
 			else if(!str_comp_nocase(pMsg->m_pMessage, "/powerups"))
