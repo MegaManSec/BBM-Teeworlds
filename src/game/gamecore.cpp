@@ -77,10 +77,9 @@ void CCharacterCore::Reset()
 
 void CCharacterCore::Tick(bool UseInput)
 {
+	forceupdate = true;
 	float PhysSize = 28.0f;
 	m_TriggeredEvents = 0;
-	
-	forceupdate = false;	
 
 	// get ground state
 	bool Grounded = false;
@@ -110,12 +109,7 @@ void CCharacterCore::Tick(bool UseInput)
 
 		if (Skills?(Skills[PUP_WALKSPD]):0) {
 		       if (m_Direction != ldir) {
-			       fuc=1000;
-		       }
-		}
-		if (fuc > 0) {
-		       if ((--fuc % 10) == 5) {
-			       forceupdate = true;
+			       fuc=100;
 		       }
 		}
 
