@@ -993,7 +993,7 @@ bool CCharacter::Unfreeze()
 	{
 		frz_tick = frz_time = frz_start = 0;
  		m_aWeapons[WEAPON_NINJA].m_Got = false;
-		if (m_LastWeapon < 0 || m_LastWeapon >= NUM_WEAPONS || m_LastWeapon  == WEAPON_NINJA || (!m_aWeapons[m_LastWeapon].m_Got)) m_LastWeapon = WEAPON_HAMMER;
+		if(m_LastWeapon < 0 || m_LastWeapon >= NUM_WEAPONS || m_LastWeapon  == WEAPON_NINJA || (!m_aWeapons[m_LastWeapon].m_Got)) m_LastWeapon = WEAPON_HAMMER;
 		SetWeapon(m_LastWeapon);
 		epicninjaannounced=0;
 		return true;
@@ -1100,6 +1100,7 @@ bool CCharacter::TakeDamage(vec2 Force, int Dmg, int From, int Weapon)
 	if(Weapon == WEAPON_NINJA)
 	{
 		Freeze(ft);
+		dbg_msg("ft","%d",ft);
 	}
 
 	/*if(Dmg)
