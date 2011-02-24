@@ -574,6 +574,27 @@ void CCharacter::OnDirectInput(CNetObj_PlayerInput *pNewInput)
 
 void CCharacter::Tick()
 {
+ft = Server()->TickSpeed() * 3;
+                int add=0;
+                if ((wasout || frz_tick == 0) && (((lasthookedat + (Server()->TickSpeed()<<1)) > Server()->Tick()) || ((lasthammeredat + Server()->TickSpeed()) > Server()->Tick())))
+                {
+                        int hooked = lasthookedat > lasthammeredat;
+                        int by = hooked ? lasthookedby : lasthammeredby;
+                        if (GameServer()->m_apPlayers[by] && GameServer()->m_apPlayers[by]->GetCharacter()) {
+                                add = GameServer()->m_apPlayers[by]->Skills[PUP_LFREEZE];
+                        }
+                        blockedby=by;
+                        if (blockedby>=0) blocktime=ft+(add * (Server()->TickSpeed()>>1));
+                } else {
+                        if (frz_tick==0) {
+                                blockedby=-1;
+                        }
+                        if (blockedby>=0)
+                                ft=blocktime;
+                }
+                add -=m_pPlayer->Skills[PUP_SFREEZE];
+                ft += (add * (Server()->TickSpeed()>>1));
+                wasout=0;
 	if(m_MuteInfo + Server()->TickSpeed() * 90 <= Server()->Tick())
 	{
 		m_pPlayer->m_MuteTimes = 0;
@@ -624,27 +645,6 @@ void CCharacter::Tick()
 	if (col == TILE_KICK) {
 		Server()->Kick(m_pPlayer->GetCID(), "Kicked by evil kick zone");
 	} else if (col == TILE_FREEZE || (col >= TILE_COLFRZ_GREEN && col <= TILE_COLFRZ_PINK)) {
-                ft = Server()->TickSpeed() * 3;
-                int add=0;
-                if ((wasout || frz_tick == 0) && (((lasthookedat + (Server()->TickSpeed()<<1)) > Server()->Tick()) || ((lasthammeredat + Server()->TickSpeed()) > Server()->Tick())))
-                {
-                        int hooked = lasthookedat > lasthammeredat;
-                        int by = hooked ? lasthookedby : lasthammeredby;
-                        if (GameServer()->m_apPlayers[by] && GameServer()->m_apPlayers[by]->GetCharacter()) {
-                                add = GameServer()->m_apPlayers[by]->Skills[PUP_LFREEZE];
-                        }
-                        blockedby=by;
-                        if (blockedby>=0) blocktime=ft+(add * (Server()->TickSpeed()>>1));
-                } else {
-                        if (frz_tick==0) {
-                                blockedby=-1;
-                        }
-                        if (blockedby>=0)
-                                ft=blocktime;
-                }
-                add -=m_pPlayer->Skills[PUP_SFREEZE];
-                ft += (add * (Server()->TickSpeed()>>1));
-                wasout=0;
                 Freeze(ft);
                if ((col >= TILE_COLFRZ_GREEN && col <= TILE_COLFRZ_PINK) && lastcolfrz + REFREEZE_INTERVAL_TICKS < Server()->Tick())
                {
