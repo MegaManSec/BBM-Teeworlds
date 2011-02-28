@@ -1,3 +1,15 @@
+BBM mod by learath2, Julian->Assange and Fisted.
+
+
+Based on offical teeworlds
+
+
+teeworlds license below
+
+
+----
+
+
 Copyright (c) 2011 Magnus Auvinen
 
 
