@@ -81,7 +81,8 @@ public:
 	int m_DefEmoteReset;
 	int ft;
 	int m_MuteInfo;
-
+	int frz_tick;//will get updated on every REFREEZE_INTERVAL ticks
+	int by;
 private:
 	void TellPowerUpInfo(int ClientID, int Skill);
 
@@ -132,7 +133,6 @@ private:
 	int m_Armor;
 
 	int frz_time;//will be higher when blocker has lfreeze, for instance
-	int frz_tick;//will get updated on every REFREEZE_INTERVAL ticks
 	int frz_start;//will be set on the first freeze
 
 	int lastcolfrz;
@@ -145,6 +145,8 @@ private:
 	int epicninjaannounced;
 	int blockedby;
 	int blocktime;
+	int add;
+	int hooked;
 	vec2 epicninjaoldpos;
 
 	// ninja

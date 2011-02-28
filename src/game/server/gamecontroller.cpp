@@ -319,14 +319,14 @@ int IGameController::OnCharacterDeath(class CCharacter *pVictim, class CPlayer *
 	// do scoreing
 	if(!pKiller || Weapon == WEAPON_GAME)
 		return 0;
-	if(pKiller == pVictim->GetPlayer())
-	{}	//pVictim->GetPlayer()->m_Score--; // suicide
+	if(pKiller == pVictim->GetPlayer() && pVictim->frz_tick > 0)
+	pVictim->GetPlayer()->m_Score--; // suicide while frozen causes -1 score
 	else
 	{
 		if(IsTeamplay() && pVictim->GetPlayer()->GetTeam() == pKiller->GetTeam())
-			pKiller->m_Score--; // teamkill
+			return 0; // teamkill
 		else
-			pKiller->m_Score++; // normal kill
+			return 0;
 	}
 	return 0;
 }

@@ -574,12 +574,12 @@ void CCharacter::OnDirectInput(CNetObj_PlayerInput *pNewInput)
 
 void CCharacter::Tick()
 {
+		hooked = lasthookedat > lasthammeredat;
+		by = hooked ? lasthookedby : lasthammeredby;
 		ft = Server()->TickSpeed() * 3;
-                int add=0;
+		add=0;
                 if ((wasout || frz_tick == 0) && (((lasthookedat + (Server()->TickSpeed()<<1)) > Server()->Tick()) || ((lasthammeredat + Server()->TickSpeed()) > Server()->Tick())))
                 {
-                        int hooked = lasthookedat > lasthammeredat;
-                        int by = hooked ? lasthookedby : lasthammeredby;
                         if (GameServer()->m_apPlayers[by] && GameServer()->m_apPlayers[by]->GetCharacter()) {
                                 add = GameServer()->m_apPlayers[by]->Skills[PUP_LFREEZE];
                         }
@@ -645,7 +645,22 @@ void CCharacter::Tick()
 	if (col == TILE_KICK) {
 		Server()->Kick(m_pPlayer->GetCID(), "Kicked by evil kick zone");
 	} else if (col == TILE_FREEZE || (col >= TILE_COLFRZ_GREEN && col <= TILE_COLFRZ_PINK)) {
-                Freeze(ft);
+		if ((wasout || frz_tick == 0) && (((lasthookedat + (Server()->TickSpeed()<<1)) > Server()->Tick()) || ((lasthammeredat + Server()->TickSpeed()) > Server()->Tick())))
+		{
+			if(frz_tick == 0)
+			{
+				if(by != GetPlayer()->GetCID())
+				{
+					if(GameServer()->m_apPlayers[by] && GameServer()->m_apPlayers[by]->GetCharacter())
+					{
+						GameServer()->m_apPlayers[m_pPlayer->GetCID()]->m_Score--;
+						GameServer()->m_apPlayers[by]->m_Score++;
+					}
+				}
+			}
+			else if(by == GetPlayer()->GetCID())
+			dbg_msg("lol","lol");}
+			Freeze(ft);
                if ((col >= TILE_COLFRZ_GREEN && col <= TILE_COLFRZ_PINK) && lastcolfrz + REFREEZE_INTERVAL_TICKS < Server()->Tick())
                {
                        lastcolfrz = Server()->Tick();
