@@ -1146,81 +1146,6 @@ void CGameContext::ConVote(IConsole::IResult *pResult, void *pUserData)
 	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", aBuf);
 }
 
-void CGameContext::ConPowerups(IConsole::IResult *pResult, void *pUserData)
-{
-	CGameContext *pSelf = (CGameContext *)pUserData;
-	if(!str_comp_nocase(pResult->GetString(1), "hammer"))
-	{
-		if(pSelf->m_apPlayers[pResult->GetInteger(0)])
-		{
-			pSelf->m_apPlayers[pResult->GetInteger(0)]->Skills[PUP_HAMMER] = pResult->GetInteger(2);
-		}
-	}
-	if(!str_comp_nocase(pResult->GetString(1), "jump"))
-	{
-		if(pSelf->m_apPlayers[pResult->GetInteger(0)])
-		{
-			pSelf->m_apPlayers[pResult->GetInteger(0)]->Skills[PUP_JUMP] = pResult->GetInteger(2);
-		}
-	}
-	if(!str_comp_nocase(pResult->GetString(1), "minusstar"))
-	{
-		if(pSelf->m_apPlayers[pResult->GetInteger(0)])
-		{
-			pSelf->m_apPlayers[pResult->GetInteger(0)]->Skills[PUP_SFREEZE] = pResult->GetInteger(2);
-		}
-	}
-	if(!str_comp_nocase(pResult->GetString(1), "plusstar"))
-	{
-		if(pSelf->m_apPlayers[pResult->GetInteger(0)])
-		{
-			pSelf->m_apPlayers[pResult->GetInteger(0)]->Skills[PUP_LFREEZE] = pResult->GetInteger(2);
-		}
-	}
-	if(!str_comp_nocase(pResult->GetString(1), "hookdur"))
-	{
-		if(pSelf->m_apPlayers[pResult->GetInteger(0)])
-		{
-			pSelf->m_apPlayers[pResult->GetInteger(0)]->Skills[PUP_HOOKDUR] = pResult->GetInteger(2);
-		}
-	}
-	if(!str_comp_nocase(pResult->GetString(1), "hooklen"))
-	{
-		if(pSelf->m_apPlayers[pResult->GetInteger(0)])
-		{
-			pSelf->m_apPlayers[pResult->GetInteger(0)]->Skills[PUP_HOOKLEN] = pResult->GetInteger(2);
-		}
-	}
-	if(!str_comp_nocase(pResult->GetString(1), "walkspd"))
-	{
-		if(pSelf->m_apPlayers[pResult->GetInteger(0)])
-		{
-			pSelf->m_apPlayers[pResult->GetInteger(0)]->Skills[PUP_WALKSPD] = pResult->GetInteger(2);
-		}
-	}
-	if(!str_comp_nocase(pResult->GetString(1), "epicninja"))
-	{
-		if(pSelf->m_apPlayers[pResult->GetInteger(0)])
-		{
-			pSelf->m_apPlayers[pResult->GetInteger(0)]->Skills[PUP_EPICNINJA] = pResult->GetInteger(2);
-		}
-	}
-	if(!str_comp_nocase(pResult->GetString(1), "reset"))
-	{
-		if(pSelf->m_apPlayers[pResult->GetInteger(0)])
-		{
-			for(int i = 0; i < MAX_CLIENTS; ++i)
-			{
-				for(int i = 0; i < NUM_PUPS; i++)
-				{
-					pSelf->m_apPlayers[pResult->GetInteger(0)]->Skills[i] = 0;
-				}
-			}
-		}
-	}
-	
-}
-
 void CGameContext::ConchainSpecialMotdupdate(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
 {
 	pfnCallback(pResult, pCallbackUserData);
@@ -1256,8 +1181,6 @@ void CGameContext::OnConsoleInit()
 	Console()->Register("vote", "r", CFGFLAG_SERVER, ConVote, this, "");
 
 	Console()->Chain("sv_motd", ConchainSpecialMotdupdate, this);
-	
-	Console()->Register("powerups", "isi", CFGFLAG_SERVER, ConPowerups, this, "");
 }
 
 void CGameContext::OnInit(/*class IKernel *pKernel*/)
