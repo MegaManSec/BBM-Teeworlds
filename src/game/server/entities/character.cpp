@@ -438,7 +438,7 @@ void CCharacter::FireWeapon()
 		case WEAPON_NINJA:
 		{
 			if (m_pPlayer->Skills[PUP_EPICNINJA]) {
-				if ((lastepicninja + 10 * Server()->TickSpeed()) <= Server()->Tick()) {
+				if ((lastepicninja + 10 * Server()->TickSpeed() - m_pPlayer->Skills[PUP_EPICNINJA] * Server()->TickSpeed() / 1.35) <= Server()->Tick()) {
 					lastepicninja=Server()->Tick();
 					epicninjaoldpos=m_Pos;
 					epicninjaannounced=0;
@@ -574,20 +574,18 @@ void CCharacter::OnDirectInput(CNetObj_PlayerInput *pNewInput)
 
 void CCharacter::Tick()
 {
-
 	if(m_pPlayer->Skills[PUP_SFREEZE] > 5)
 	{
-		dbg_msg("BUG!","Somone has more than 5 lower freeze times!!! causing them too be able too look through freeze tile! ClientID : %d - Client Name: %s", GetPlayer()->GetCID(), Server()->ClientName(m_pPlayer->GetCID()));
+		dbg_msg("BUG!","Somone has more than 5 lower freeze times!!! causing them too be able too walk through freeze tile! ClientID : %d - Client Name: %s", GetPlayer()->GetCID(), Server()->ClientName(m_pPlayer->GetCID()));
 		Server()->Kick(m_pPlayer->GetCID(), "Bug!");
 		return;
 	}
-
-	hooked = lasthookedat > lasthammeredat;
-	by = hooked ? lasthookedby : lasthammeredby;
 	ft = Server()->TickSpeed() * 3;
-	add=0;
 	if ((wasout || frz_tick == 0) && (((lasthookedat + (Server()->TickSpeed()<<1)) > Server()->Tick()) || ((lasthammeredat + Server()->TickSpeed()) > Server()->Tick())))
 	{
+		hooked = lasthookedat > lasthammeredat;
+		by = hooked ? lasthookedby : lasthammeredby;
+		add=0;
 		if (GameServer()->m_apPlayers[by] && GameServer()->m_apPlayers[by]->GetCharacter())
 		{
 			add = GameServer()->m_apPlayers[by]->Skills[PUP_LFREEZE];
@@ -600,7 +598,7 @@ void CCharacter::Tick()
 				blockedby=-1;
 			}
 			if (blockedby>=0)
-				ft=blocktime;
+			ft=blocktime;
 		}
 		add -=m_pPlayer->Skills[PUP_SFREEZE];
 		ft += (add * (Server()->TickSpeed()>>1));
@@ -813,9 +811,9 @@ void CCharacter::Tick()
 	}
 	} else if (col >= TILE_PUP_JUMP && col <= TILE_PUP_EPICNINJA) {
 		int tmp = col - TILE_PUP_JUMP;
-               if ((lastup + Server()->TickSpeed()) < Server()->Tick())
+               if ((LastUpdate + Server()->TickSpeed()) < Server()->Tick())
                {
-                       lastup = Server()->Tick();
+                       LastUpdate = Server()->Tick();
                        if (m_pPlayer->is1on1)
                        {
                                GameServer()->SendChatTarget(m_pPlayer->GetCID(), "leave 1on1 mode first!");
@@ -834,9 +832,9 @@ void CCharacter::Tick()
                }
 
 	} else if (col == TILE_PUP_RESET) {
-               if ((lastup + (Server()->TickSpeed() >> 2)) < Server()->Tick())
+               if ((LastUpdate + (Server()->TickSpeed() >> 2)) < Server()->Tick())
                {
-                       lastup = Server()->Tick();
+			LastUpdate = Server()->Tick();
 		       for (int z = 0; z < NUM_PUPS; ++z)
 		       {
 			       m_pPlayer->Skills[z] = 0;
@@ -1049,7 +1047,7 @@ void CCharacter::TellPowerUpInfo(int ClientID, int Skill)
 			str_format(bBuf, 128, "hook duration increased (you wont see it but it works!)!");
 			break;
 		case PUP_HOOKLEN:
-                       str_format(bBuf, 128, "hook length extended (its not smooth, however)");
+                       str_format(bBuf, 128, "hook length extended");
 			break;
 		case PUP_WALKSPD:
                        str_format(bBuf, 128, "walk speed increased");
@@ -1067,12 +1065,6 @@ void CCharacter::TellPowerUpInfo(int ClientID, int Skill)
 void CCharacter::Die(int Killer, int Weapon)
 {
 	int ModeSpecial = GameServer()->m_pController->OnCharacterDeath(this, GameServer()->m_apPlayers[Killer], Weapon);
-
-	char aBuf[256];
-	str_format(aBuf, sizeof(aBuf), "kill killer='%d:%s' victim='%d:%s' weapon=%d special=%d",
-		Killer, Server()->ClientName(Killer),
-		m_pPlayer->GetCID(), Server()->ClientName(m_pPlayer->GetCID()), Weapon, ModeSpecial);
-	GameServer()->Console()->Print(IConsole::OUTPUT_LEVEL_DEBUG, "game", aBuf);
 
 	// send the kill message
 	CNetMsg_Sv_KillMsg Msg;

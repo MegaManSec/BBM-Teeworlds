@@ -139,7 +139,7 @@ private:
 	int lastloadsave;
 	int lasthammeredby, lasthammeredat;
 	int lasthookedby, lasthookedat;
-	int lastup;
+	int LastUpdate;
 	int wasout;
 	int lastepicninja;
 	int epicninjaannounced;
