@@ -631,7 +631,7 @@ void CCharacter::Tick()
 			Unfreeze();
 		}
 	}
-	if (frz_tick && m_pPlayer->Skills[PUP_EPICNINJA] && ((lastepicninja+10*Server()->TickSpeed() - m_pPlayer->Skills[PUP_EPICNINJA] * Server()->TickSpeed() / 1.35) < Server()->Tick()) && !epicninjaannounced)
+	if (frz_tick && m_pPlayer->Skills[PUP_EPICNINJA] && (lastepicninja+10*Server()->TickSpeed() - (m_pPlayer->Skills[PUP_EPICNINJA] * Server()->TickSpeed() / 1.35) <= Server()->Tick()) && !epicninjaannounced)
 	{
 		str_format(bBuf, 128, "epic ninja ready!");
 		GameServer()->SendChatTarget(m_pPlayer->GetCID(), bBuf);
