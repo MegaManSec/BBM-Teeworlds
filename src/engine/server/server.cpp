@@ -1525,11 +1525,11 @@ void CServer::RegisterCommands()
 {
 	m_pConsole = Kernel()->RequestInterface<IConsole>();
 	
-	Console()->Register("kick", "i?r", CFGFLAG_SERVER, ConKick, this, "");
-	Console()->Register("ban", "s?ir", CFGFLAG_SERVER|CFGFLAG_STORE, ConBan, this, "");
-	Console()->Register("unban", "s", CFGFLAG_SERVER|CFGFLAG_STORE, ConUnban, this, "");
-	Console()->Register("bans", "", CFGFLAG_SERVER|CFGFLAG_STORE, ConBans, this, "");
-	Console()->Register("status", "", CFGFLAG_SERVER, ConStatus, this, "");
+	//Console()->Register("kick", "i?r", CFGFLAG_SERVER, ConKick, this, "");
+	//Console()->Register("ban", "s?ir", CFGFLAG_SERVER|CFGFLAG_STORE, ConBan, this, "");
+	//Console()->Register("unban", "s", CFGFLAG_SERVER|CFGFLAG_STORE, ConUnban, this, "");
+	//Console()->Register("bans", "", CFGFLAG_SERVER|CFGFLAG_STORE, ConBans, this, "");
+	//Console()->Register("status", "", CFGFLAG_SERVER, ConStatus, this, "");
 	Console()->Register("shutdown", "", CFGFLAG_SERVER, ConShutdown, this, "");
 
 	Console()->Register("record", "?s", CFGFLAG_SERVER|CFGFLAG_STORE, ConRecord, this, "");
@@ -1543,10 +1543,10 @@ void CServer::RegisterCommands()
 	Console()->Register("clear_banmasters",	"", CFGFLAG_SERVER, ConClearBanmasters, this, "");
 	//Console()->Register("reload", "", CFGFLAG_SERVER, ConMapReload, this, "");
 
-	//Console()->Chain("sv_name", ConchainSpecialInfoupdate, this);
-	//Console()->Chain("password", ConchainSpecialInfoupdate, this);
+	Console()->Chain("sv_name", ConchainSpecialInfoupdate, this);
+	Console()->Chain("password", ConchainSpecialInfoupdate, this);
 
-	//Console()->Chain("sv_max_clients_per_ip", ConchainMaxclientsperipUpdate, this);
+	Console()->Chain("sv_max_clients_per_ip", ConchainMaxclientsperipUpdate, this);
 }	
 
 
