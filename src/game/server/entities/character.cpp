@@ -677,182 +677,194 @@ void CCharacter::Tick()
                        int prevfc = m_pPlayer->forcecolor;
                        switch (col)
                        {
-                              case TILE_COLFRZ_GREEN:
+				case TILE_COLFRZ_GREEN:
 					if(!m_pPlayer->m_NoGreen)
-                                      m_pPlayer->forcecolor = COL_GREEN;
-                                      break;
-                              case TILE_COLFRZ_BLUE:
+					m_pPlayer->forcecolor = COL_GREEN;
+					break;
+				case TILE_COLFRZ_BLUE:
 					if(!m_pPlayer->m_NoBlue)
-                                      m_pPlayer->forcecolor = COL_BLUE;
-                                      break;
-                              case TILE_COLFRZ_RED:
+					m_pPlayer->forcecolor = COL_BLUE;
+					break;
+				case TILE_COLFRZ_RED:
 					if(!m_pPlayer->m_NoRed)
-                                      m_pPlayer->forcecolor = COL_RED;
-                                      break;
-                              case TILE_COLFRZ_WHITE:
+					m_pPlayer->forcecolor = COL_RED;
+					break;
+				case TILE_COLFRZ_WHITE:
 					if(!m_pPlayer->m_NoWhite)
-                                      m_pPlayer->forcecolor = COL_WHITE;
-                                      break;
-                              case TILE_COLFRZ_GREY:
+					m_pPlayer->forcecolor = COL_WHITE;
+					break;
+				case TILE_COLFRZ_GREY:
 					if(!m_pPlayer->m_NoGrey)
-                                      m_pPlayer->forcecolor = COL_GREY;
-                                      break;
-                              case TILE_COLFRZ_YELLOW:
+					m_pPlayer->forcecolor = COL_GREY;
+					break;
+				case TILE_COLFRZ_YELLOW:
 					if(!m_pPlayer->m_NoYellow)
-                                      m_pPlayer->forcecolor = COL_YELLOW;
-                                      break;
-                              case TILE_COLFRZ_PINK:
+					m_pPlayer->forcecolor = COL_YELLOW;
+					break;
+				case TILE_COLFRZ_PINK:
 					if(!m_pPlayer->m_NoPink)
-                                      m_pPlayer->forcecolor = COL_PINK;
-                                      break;
-                       }
-                       if (m_pPlayer->forcecolor != prevfc)
-                       {
-                               m_pPlayer->m_TeeInfos.m_UseCustomColor = (m_pPlayer->forcecolor) ? 1 : m_pPlayer->origusecustcolor;
-                               m_pPlayer->m_TeeInfos.m_ColorBody = (m_pPlayer->forcecolor) ? m_pPlayer->forcecolor : m_pPlayer->origbodycolor;
-                               m_pPlayer->m_TeeInfos.m_ColorFeet = (m_pPlayer->forcecolor) ? m_pPlayer->forcecolor : m_pPlayer->origfeetcolor;
-                               GameServer()->m_pController->OnPlayerInfoChange(m_pPlayer);
-                      }
-              }
+					m_pPlayer->forcecolor = COL_PINK;
+					break;
+			}
+			if (m_pPlayer->forcecolor != prevfc)
+			{
+				m_pPlayer->m_TeeInfos.m_UseCustomColor = (m_pPlayer->forcecolor) ? 1 : m_pPlayer->origusecustcolor;
+				m_pPlayer->m_TeeInfos.m_ColorBody = (m_pPlayer->forcecolor) ? m_pPlayer->forcecolor : m_pPlayer->origbodycolor;
+				m_pPlayer->m_TeeInfos.m_ColorFeet = (m_pPlayer->forcecolor) ? m_pPlayer->forcecolor : m_pPlayer->origfeetcolor;
+				GameServer()->m_pController->OnPlayerInfoChange(m_pPlayer);
+			}
+		}
 
 	} 
 
-	 if ((col >= TILE_GREEN && col <= TILE_PINK) && lastcolfrz + REFREEZE_INTERVAL_TICKS < Server()->Tick())
-               {
-                       lastcolfrz = Server()->Tick();
-                       switch (col)
-                       {
-                              case TILE_GREEN:
-                                      m_pPlayer->m_NoGreen = true;
+	if ((col >= TILE_GREEN && col <= TILE_PINK) && lastcolfrz + REFREEZE_INTERVAL_TICKS < Server()->Tick())
+		{
+			lastcolfrz = Server()->Tick();
+			switch (col)
+			{
+				case TILE_GREEN:
+					m_pPlayer->m_NoGreen = true;
 					GameServer()->SendChatTarget(m_pPlayer->GetCID(), "Green will no longer effect you!");
-                                      break;
-                              case TILE_BLUE:
-                                      m_pPlayer->m_NoBlue = true;
+					break;
+				case TILE_BLUE:
+					m_pPlayer->m_NoBlue = true;
 					GameServer()->SendChatTarget(m_pPlayer->GetCID(), "Blue will no longer effect you!");
-                                      break;
-                              case TILE_RED:
-                                      m_pPlayer->m_NoRed = true;
+					break;
+				case TILE_RED:
+					m_pPlayer->m_NoRed = true;
 					GameServer()->SendChatTarget(m_pPlayer->GetCID(), "Red will no longer effect you!");
-                                      break;
-                              case TILE_WHITE:
-                                     m_pPlayer->m_NoWhite = true;
+					break;
+				case TILE_WHITE:
+					m_pPlayer->m_NoWhite = true;
 					GameServer()->SendChatTarget(m_pPlayer->GetCID(), "White will no longer effect you!");
-                                      break;
-                              case TILE_GREY:
-                                     m_pPlayer->m_NoGrey = true;
+					break;
+				case TILE_GREY:
+					m_pPlayer->m_NoGrey = true;
 					GameServer()->SendChatTarget(m_pPlayer->GetCID(), "Grey will no longer effect you!");
-                                      break;
-                              case TILE_YELLOW:
-                                      m_pPlayer->m_NoYellow = true;
+					break;
+				case TILE_YELLOW:
+					m_pPlayer->m_NoYellow = true;
 					GameServer()->SendChatTarget(m_pPlayer->GetCID(), "Yellow will no longer effect you!");
-                                      break;
+ 					break;
                               case TILE_PINK:
-                                      m_pPlayer->m_NoPink = true;
+					m_pPlayer->m_NoPink = true;
 					GameServer()->SendChatTarget(m_pPlayer->GetCID(), "Pink will no longer effect you!");
-                                      break;
-                       }
+					break;
+			}
 
 		}
-	else if (col == TILE_UNFREEZE) {
+	else if (col == TILE_UNFREEZE)
+	{
 		Unfreeze();
 		wasout=1;
 
-	} else if (col == TILE_1ON1TOGGLE) {
-               if ((lastloadsave + Server()->TickSpeed()) < Server()->Tick())
-               {
-                       lastloadsave = Server()->Tick();
-                       if ((m_pPlayer->is1on1 = 1 - m_pPlayer->is1on1))
-                       {
-                               int *sl = m_pPlayer->slot3;
-                               if (sl)
-                                       free(sl);
-                               sl = (int*) malloc(sizeof(int) * NUM_PUPS);
-                               for (int z = 0; z < NUM_PUPS; ++z)
-                               {
-                                       sl[z] = m_pPlayer->Skills[z];
-                                       m_pPlayer->Skills[z] = 0;
-                               }
-                               m_pPlayer->slot3 = sl;
-                               m_pPlayer->oname = strdup(Server()->ClientName(m_pPlayer->GetCID()));
-                               char *buf = (char*) malloc(strlen(m_pPlayer->oname) + 8);
-                               sprintf(buf, "[1on1] %s", m_pPlayer->oname);
-                               Server()->SetClientName(m_pPlayer->GetCID(), buf);
-
-                       }
-                       else
-                       {
-                               int *sl = m_pPlayer->slot3;
-                               if (sl)
-                               {
-                                       for (int z = 0; z < NUM_PUPS; ++z)
-                                               m_pPlayer->Skills[z] = sl[z];
-                               }
-                               Server()->SetClientName(m_pPlayer->GetCID(), m_pPlayer->oname);
-                               free(m_pPlayer->oname);
-                               m_pPlayer->oname = NULL;
-                       }
-
-                       str_format(bBuf, 128, "1on1 mode %s", (m_pPlayer->is1on1) ? "ON" : "OFF");
-                       GameServer()->SendChatTarget(m_pPlayer->GetCID(), bBuf);
-               }
-
-	} else if (col >= TILE_BOOST_L && col <= TILE_BOOST_U) {
-		m_Core.m_Vel += GameServer()->Collision()->boost_accel(col);
-	} else if (col == TILE_COLFRZ_RESET) {					
-               if (lastcolfrz + REFREEZE_INTERVAL_TICKS < Server()->Tick())
-               {
-			if (m_pPlayer->forcecolor)
-
-		       {
-					m_pPlayer->forcecolor = 0;
-                       m_pPlayer->m_TeeInfos.m_UseCustomColor = (m_pPlayer->forcecolor) ? 1 : m_pPlayer->origusecustcolor;
-                       m_pPlayer->m_TeeInfos.m_ColorBody = (m_pPlayer->forcecolor) ? m_pPlayer->forcecolor : m_pPlayer->origbodycolor;
-                       m_pPlayer->m_TeeInfos.m_ColorFeet = (m_pPlayer->forcecolor) ? m_pPlayer->forcecolor : m_pPlayer->origfeetcolor;
-                       GameServer()->m_pController->OnPlayerInfoChange(m_pPlayer);
-               }
 	}
-	} else if (col >= TILE_PUP_JUMP && col <= TILE_PUP_EPICNINJA) {
-		int tmp = col - TILE_PUP_JUMP;
-               if ((LastUpdate + Server()->TickSpeed()) < Server()->Tick())
-               {
-                       LastUpdate = Server()->Tick();
-                       if (m_pPlayer->is1on1)
-                       {
-                               GameServer()->SendChatTarget(m_pPlayer->GetCID(), "leave 1on1 mode first!");
-                       }
-                       if ((lastepicninja +  Server()->TickSpeed()) > Server()->Tick())
-                       {
-                               GameServer()->SendChatTarget(m_pPlayer->GetCID(), "bad luck...");
-                       }
-                       else
-                       {
-				if (m_pPlayer->Skills[tmp] < g_Config.m_MaxPowerUps) {
-				    m_pPlayer->Skills[tmp]++;
-				    TellPowerUpInfo(m_pPlayer->GetCID(), tmp);
+	else if (col == TILE_1ON1TOGGLE)
+	{
+		if ((lastloadsave + Server()->TickSpeed()) < Server()->Tick())
+		{
+			lastloadsave = Server()->Tick();
+			if ((m_pPlayer->is1on1 = 1 - m_pPlayer->is1on1))
+			{
+				int *sl = m_pPlayer->slot3;
+				if (sl)
+					free(sl);
+				sl = (int*) malloc(sizeof(int) * NUM_PUPS);
+				for (int z = 0; z < NUM_PUPS; ++z)
+				{
+					sl[z] = m_pPlayer->Skills[z];
+					m_pPlayer->Skills[z] = 0;
 				}
-                       }
-               }
+				m_pPlayer->slot3 = sl;
+				m_pPlayer->oname = strdup(Server()->ClientName(m_pPlayer->GetCID()));
+				char *buf = (char*) malloc(strlen(m_pPlayer->oname) + 8);
+				sprintf(buf, "[1on1] %s", m_pPlayer->oname);
+				Server()->SetClientName(m_pPlayer->GetCID(), buf);
 
-	} else if (col == TILE_PUP_RESET) {
-               if ((LastUpdate + (Server()->TickSpeed() >> 2)) < Server()->Tick())
-               {
-			LastUpdate = Server()->Tick();
-		       for (int z = 0; z < NUM_PUPS; ++z)
-		       {
-			       m_pPlayer->Skills[z] = 0;
-		       }
-		       GameServer()->SendChatTarget(m_pPlayer->GetCID(), "select new powerups!");
+			}
+			else
+			{
+				int *sl = m_pPlayer->slot3;
+				if (sl)
+				{
+					for (int z = 0; z < NUM_PUPS; ++z)
+					m_pPlayer->Skills[z] = sl[z];
+				}
+				Server()->SetClientName(m_pPlayer->GetCID(), m_pPlayer->oname);
+				free(m_pPlayer->oname);
+				m_pPlayer->oname = NULL;
+			}
+			str_format(bBuf, 128, "1on1 mode %s", (m_pPlayer->is1on1) ? "ON" : "OFF");
+			GameServer()->SendChatTarget(m_pPlayer->GetCID(), bBuf);
+			}
 		}
-	} else if (col >= TILE_TPORT_FIRST && col <= TILE_TPORT_LAST) {
+		else if (col >= TILE_BOOST_L && col <= TILE_BOOST_U)
+		{
+			m_Core.m_Vel += GameServer()->Collision()->boost_accel(col);
+		}
+		else if (col == TILE_COLFRZ_RESET)
+		{					
+		if (lastcolfrz + REFREEZE_INTERVAL_TICKS < Server()->Tick())
+		{
+			if (m_pPlayer->forcecolor)
+			{
+				m_pPlayer->forcecolor = 0;
+				m_pPlayer->m_TeeInfos.m_UseCustomColor = (m_pPlayer->forcecolor) ? 1 : m_pPlayer->origusecustcolor;
+				m_pPlayer->m_TeeInfos.m_ColorBody = (m_pPlayer->forcecolor) ? m_pPlayer->forcecolor : m_pPlayer->origbodycolor;
+				m_pPlayer->m_TeeInfos.m_ColorFeet = (m_pPlayer->forcecolor) ? m_pPlayer->forcecolor : m_pPlayer->origfeetcolor;
+				GameServer()->m_pController->OnPlayerInfoChange(m_pPlayer);
+			}
+		}
+	}
+	else if (col >= TILE_PUP_JUMP && col <= TILE_PUP_EPICNINJA) {
+		int tmp = col - TILE_PUP_JUMP;
+		if ((LastUpdate + Server()->TickSpeed()) < Server()->Tick())
+		{
+			LastUpdate = Server()->Tick();
+			if (m_pPlayer->is1on1)
+			{
+				GameServer()->SendChatTarget(m_pPlayer->GetCID(), "leave 1on1 mode first!");
+			}
+			if ((lastepicninja +  Server()->TickSpeed()) > Server()->Tick())
+			{
+				GameServer()->SendChatTarget(m_pPlayer->GetCID(), "bad luck...");
+			}
+			else
+			{
+				if (m_pPlayer->Skills[tmp] < g_Config.m_MaxPowerUps)
+				{
+					m_pPlayer->Skills[tmp]++;
+					TellPowerUpInfo(m_pPlayer->GetCID(), tmp);
+				}
+			}
+		}
+	}
+	else if (col == TILE_PUP_RESET)
+	{
+		if ((LastUpdate + (Server()->TickSpeed() >> 2)) < Server()->Tick())
+		{
+			LastUpdate = Server()->Tick();
+			for (int z = 0; z < NUM_PUPS; ++z)
+			{
+				m_pPlayer->Skills[z] = 0;
+			}
+			GameServer()->SendChatTarget(m_pPlayer->GetCID(), "select new powerups!");
+		}
+	}
+	else if (col >= TILE_TPORT_FIRST && col <= TILE_TPORT_LAST)
+	{
 		int tmp = col-TILE_TPORT_FIRST;
-		if (tmp&1) {
+		if (tmp&1)
+		{
 			m_Core.m_HookedPlayer = -1;
 			m_Core.m_HookState = HOOK_RETRACTED;
 			m_Core.m_TriggeredEvents |= COREEVENT_HOOK_RETRACT;
 			m_Core.m_HookPos = m_Core.m_Pos;
 			m_Core.m_Pos = GameServer()->Collision()->GetTeleDest(tmp>>1);
 		}
-	} else {
+	}
+	else
+	{
 		wasout = 1;
 	}
 
@@ -986,7 +998,7 @@ bool CCharacter::IncreaseArmor(int Amount)
 bool CCharacter::Freeze(int ticks)
 {
 	if (ticks <= 1)
-	return false;
+		return false;
 	if (frz_tick > 0)//already frozen
 	{
 		if (frz_tick + REFREEZE_INTERVAL_TICKS > Server()->Tick())
@@ -1002,7 +1014,6 @@ bool CCharacter::Freeze(int ticks)
 	frz_time=ticks;
 	m_Ninja.m_ActivationTick = Server()->Tick();
 	m_aWeapons[WEAPON_NINJA].m_Got = true;
-
 	m_aWeapons[WEAPON_NINJA].m_Ammo = -1;
 	if (m_ActiveWeapon != WEAPON_NINJA)
 	{
@@ -1034,28 +1045,28 @@ void CCharacter::TellPowerUpInfo(int ClientID, int Skill)
 	switch(Skill)
 	{
 		case PUP_JUMP:
-			str_format(bBuf, 128, "you got an extra air jump!");
+			str_format(bBuf, 128, "You got an extra jump");
 			break;
 		case PUP_HAMMER:
-			str_format(bBuf, 128, "hammer powered!");
+			str_format(bBuf, 128, "Hammer power increased");
 			break;
 		case PUP_LFREEZE:
-			str_format(bBuf, 128, "enemy freeze time increased!");
+			str_format(bBuf, 128, "Enemy freeze time increased");
 			break;
 		case PUP_SFREEZE:
-			str_format(bBuf, 128, "own freeze time shortened!");
+			str_format(bBuf, 128, "Own freeze time shortened");
 			break;
 		case PUP_HOOKDUR:
-			str_format(bBuf, 128, "hook duration increased (you wont see it but it works!)!");
+			str_format(bBuf, 128, "Hook duration increased");
 			break;
 		case PUP_HOOKLEN:
-                       str_format(bBuf, 128, "hook length extended");
+                       str_format(bBuf, 128, "Hook length extended");
 			break;
 		case PUP_WALKSPD:
-                       str_format(bBuf, 128, "walk speed increased");
+                       str_format(bBuf, 128, "Walk speed increased");
 			break;
 		case PUP_EPICNINJA:
-                       str_format(bBuf, 128, "eeeeeeeeeeeeeeeeepic ninja! (freeze attack)");
+                       str_format(bBuf, 128, "Freeze attack");
 			break;
 		default:
 			str_format(bBuf, 128, "wtf");
@@ -1119,7 +1130,6 @@ bool CCharacter::TakeDamage(vec2 Force, int Dmg, int From, int Weapon)
 	if(Weapon == WEAPON_NINJA)
 	{
 		Freeze(ft + GameServer()->m_apPlayers[From]->Skills[PUP_LFREEZE] * (Server()->TickSpeed()>>1));
-		dbg_msg("ft","%d",ft);
 	}
 
 	/*if(Dmg)

@@ -11,13 +11,13 @@
 
 #define REFREEZE_INTERVAL_TICKS (Server()->TickSpeed()>>1)
 
-#define COL_BLUE 0x90ff4d
-#define COL_GREEN 0x51ff4d
-#define COL_WHITE 0xffffff
-#define COL_GREY 0x1
-#define COL_RED 0xff00
-#define COL_YELLOW 0x2bff00
-#define COL_PINK 0xd6ff5b
+#define COL_BLUE 9502541
+#define COL_GREEN 5373773
+#define COL_WHITE 16777215
+#define COL_GREY 1
+#define COL_RED 65280
+#define COL_YELLOW 2883328
+#define COL_PINK 14090075
 
 enum
 {
