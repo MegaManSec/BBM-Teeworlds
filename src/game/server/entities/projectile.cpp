@@ -77,6 +77,11 @@ void CProjectile::Tick()
 			
 		//else if(TargetChr)
 		//	TargetChr->TakeDamage(m_Direction * max(0.001f, m_Force), m_Damage, m_Owner, m_Weapon);
+		else if (m_Weapon == WEAPON_GUN)
+		{
+			GameServer()->CreateDamageInd(CurPos, -atan2(m_Direction.x, m_Direction.y), 5);
+			GameServer()->m_World.DestroyEntity(this);
+		}
 
 		GameServer()->m_World.DestroyEntity(this);
 	}

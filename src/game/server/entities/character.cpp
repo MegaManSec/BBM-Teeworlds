@@ -135,9 +135,10 @@ bool CCharacter::IsGrounded()
 
 void CCharacter::HandleNinja()
 {
+	if(frz_time - Server()->TickSpeed()*0.3 <= 0)
+		return;
 	if(m_ActiveWeapon != WEAPON_NINJA)
 		return;
-	
 	vec2 Direction = normalize(vec2(m_LatestInput.m_TargetX, m_LatestInput.m_TargetY));
 
 	if ((Server()->Tick() - m_Ninja.m_ActivationTick) > (g_pData->m_Weapons.m_Ninja.m_Duration * Server()->TickSpeed() / 1000))
@@ -574,6 +575,8 @@ void CCharacter::OnDirectInput(CNetObj_PlayerInput *pNewInput)
 
 void CCharacter::Tick()
 {
+	if(frz_time - Server()->TickSpeed()*0.5 == 0)
+	dbg_msg("lol","nigger");
 	if(m_pPlayer->Skills[PUP_SFREEZE] > 5)
 	{
 		dbg_msg("BUG!","Somone has more than 5 lower freeze times!!! causing them too be able too walk through freeze tile! ClientID : %d - Client Name: %s", GetPlayer()->GetCID(), Server()->ClientName(m_pPlayer->GetCID()));

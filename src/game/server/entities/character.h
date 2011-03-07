@@ -9,7 +9,7 @@
 
 #include <game/gamecore.h>
 
-#define REFREEZE_INTERVAL_TICKS (Server()->TickSpeed()>>1)
+#define REFREEZE_INTERVAL_TICKS (Server()->TickSpeed() * 1)
 
 #define COL_BLUE 9502541
 #define COL_GREEN 5373773
