@@ -575,8 +575,6 @@ void CCharacter::OnDirectInput(CNetObj_PlayerInput *pNewInput)
 
 void CCharacter::Tick()
 {
-	if(frz_time - Server()->TickSpeed()*0.5 == 0)
-	dbg_msg("lol","nigger");
 	if(m_pPlayer->Skills[PUP_SFREEZE] > 5)
 	{
 		dbg_msg("BUG!","Somone has more than 5 lower freeze times!!! causing them too be able too walk through freeze tile! ClientID : %d - Client Name: %s", GetPlayer()->GetCID(), Server()->ClientName(m_pPlayer->GetCID()));
