@@ -274,7 +274,7 @@ void CCharacter::HandleWeaponSwitch()
 
 void CCharacter::FireWeapon()
 {
-	if(!CanFire)
+	if(!CanFire && m_ActiveWeapon != WEAPON_NINJA)
 		return;
 	if(m_ReloadTimer != 0)
 		return;
