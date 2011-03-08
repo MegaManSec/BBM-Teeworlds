@@ -82,6 +82,7 @@ bool CCharacter::Spawn(CPlayer *pPlayer, vec2 Pos)
 	
 	GameServer()->m_World.InsertEntity(this);
 	m_Alive = true;
+	CanFire = true;
 
 	m_Core.Skills=m_pPlayer->Skills;
 	if (m_pPlayer->is1on1) {
@@ -273,6 +274,8 @@ void CCharacter::HandleWeaponSwitch()
 
 void CCharacter::FireWeapon()
 {
+	if(!CanFire)
+		return;
 	if(m_ReloadTimer != 0)
 		return;
 		
@@ -575,6 +578,7 @@ void CCharacter::OnDirectInput(CNetObj_PlayerInput *pNewInput)
 
 void CCharacter::Tick()
 {
+	m_Armor=(frz_time >= 0)?10-(frz_time/15):0;
 	if(m_pPlayer->Skills[PUP_SFREEZE] > 5)
 	{
 		dbg_msg("BUG!","Somone has more than 5 lower freeze times!!! causing them too be able too walk through freeze tile! ClientID : %d - Client Name: %s", GetPlayer()->GetCID(), Server()->ClientName(m_pPlayer->GetCID()));
@@ -609,7 +613,6 @@ void CCharacter::Tick()
 		m_pPlayer->m_MuteTimes = 0;
 		m_MuteInfo = Server()->Tick();
 	}
-	m_Armor=(frz_time >= 0)?10-(frz_time/15):0;
 	if(m_pPlayer->m_ForceBalanced)
 	{
 		char Buf[128];
@@ -618,16 +621,18 @@ void CCharacter::Tick()
 		
 		m_pPlayer->m_ForceBalanced = false;
 	}
-        if (frz_time > 0) {
+	if (frz_time > 0) {
 	SetEmote(EMOTE_BLINK, Server()->Tick());
-                if (frz_time % (REFREEZE_INTERVAL_TICKS) == 0) {
+		if (frz_time % (REFREEZE_INTERVAL_TICKS) == 0)
+		{
+			if(frz_tick < 7*Server()->Tick())
 			GameServer()->CreateDamageInd(m_Pos, 0, frz_time / REFREEZE_INTERVAL_TICKS);
                 }
 		frz_time--;
 		m_Input.m_Direction = 0;
 		m_Input.m_Jump = 0;
 		m_Input.m_Hook = 0;
-		m_Input.m_Fire = 0;
+		CanFire = false;
 		if (frz_time - 1 == 0) {
 			Unfreeze();
 		}
@@ -1030,6 +1035,7 @@ bool CCharacter::Unfreeze()
 	{
 		frz_tick = frz_time = frz_start = 0;
  		m_aWeapons[WEAPON_NINJA].m_Got = false;
+		CanFire = true;
 		if(m_LastWeapon < 0 || m_LastWeapon >= NUM_WEAPONS || m_LastWeapon  == WEAPON_NINJA || (!m_aWeapons[m_LastWeapon].m_Got)) m_LastWeapon = WEAPON_HAMMER;
 		SetWeapon(m_LastWeapon);
 		epicninjaannounced=0;

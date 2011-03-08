@@ -81,6 +81,7 @@ public:
 	int m_DefEmoteReset;
 	int ft;
 	int m_MuteInfo;
+	bool CanFire;
 	int frz_tick;//will get updated on every REFREEZE_INTERVAL ticks
 	int by;
 private:
