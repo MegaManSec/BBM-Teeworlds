@@ -441,13 +441,14 @@ void CCharacter::FireWeapon()
 		
 		case WEAPON_NINJA:
 		{
-			if (m_pPlayer->Skills[PUP_EPICNINJA]) {
+			if (m_pPlayer->Skills[PUP_EPICNINJA])
+			{
 				if ((lastepicninja + 10 * Server()->TickSpeed() - m_pPlayer->Skills[PUP_EPICNINJA] * Server()->TickSpeed() / 1.35) <= Server()->Tick()) {
 					lastepicninja=Server()->Tick();
 					epicninjaoldpos=m_Pos;
 					epicninjaannounced=0;
 				} else {
-					str_format(bBuf, 128, "epic ninja not yet ready.");
+					str_format(bBuf, 128, "Freeze attack not ready yet.");
 					GameServer()->SendChatTarget(m_pPlayer->GetCID(), bBuf);
                                         return;
                                 }
@@ -639,9 +640,12 @@ void CCharacter::Tick()
 	}
 	if (frz_tick && m_pPlayer->Skills[PUP_EPICNINJA] && (lastepicninja+10*Server()->TickSpeed() - (m_pPlayer->Skills[PUP_EPICNINJA] * Server()->TickSpeed() / 1.35) <= Server()->Tick()) && !epicninjaannounced)
 	{
-		str_format(bBuf, 128, "epic ninja ready!");
-		GameServer()->SendChatTarget(m_pPlayer->GetCID(), bBuf);
-		epicninjaannounced=1;
+		if(frz_time - Server()->TickSpeed()*0.3 >= 0)
+		{
+			str_format(bBuf, 128, "Freeze attack ready!");
+			GameServer()->SendChatTarget(m_pPlayer->GetCID(), bBuf);
+			epicninjaannounced=1;
+		}
 	}
 
 	m_Core.m_Input = m_Input;
@@ -1076,7 +1080,7 @@ void CCharacter::TellPowerUpInfo(int ClientID, int Skill)
                        str_format(bBuf, 128, "Freeze attack");
 			break;
 		default:
-			str_format(bBuf, 128, "wtf");
+			str_format(bBuf, 128, "Bug! Contact an admin!");
 			break;
 	}
 	GameServer()->SendChatTarget(ClientID, bBuf);
