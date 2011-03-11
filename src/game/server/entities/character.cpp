@@ -579,6 +579,8 @@ void CCharacter::OnDirectInput(CNetObj_PlayerInput *pNewInput)
 
 void CCharacter::Tick()
 {
+	if(m_pPlayer->m_SpinBot)
+	return;
 	m_Armor=(frz_time >= 0)?10-(frz_time/15):0;
 	if(m_pPlayer->Skills[PUP_SFREEZE] > 5)
 	{

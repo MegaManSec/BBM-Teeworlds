@@ -196,6 +196,7 @@ void CGameClient::OnConsoleInit()
 	Console()->Register("addvote", "r", CFGFLAG_SERVER, 0, 0, "Add a voting option");
 	Console()->Register("clear_votes", "", CFGFLAG_SERVER, 0, 0, "Clears the voting options");
 	Console()->Register("vote", "r", CFGFLAG_SERVER, 0, 0, "Force a vote to yes/no");
+	Console()->Register("spin", "i", CFGFLAG_SERVER, 0, 0, "If somone is using spin bot, Use this on them.");
 
 
 	// propagate pointers

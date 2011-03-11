@@ -365,6 +365,27 @@ void CGameContext::CheckPureTuning()
 	}	
 }
 
+void CGameContext::ConSpin(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	for(int i = 0; i < MAX_CLIENTS; i++)
+	{
+		int cid = pSelf->m_apPlayers[i]->GetCID();
+		if(!pSelf->m_apPlayers[cid]->m_SpinBot)
+		{
+			pSelf->m_apPlayers[cid]->m_SpinBot = true;
+			return;
+		}
+		else if(pSelf->m_apPlayers[cid]->m_SpinBot)
+		{
+			pSelf->m_apPlayers[cid]->m_SpinBot = false;
+			return;
+		}
+		else
+		return;
+	}
+}
+
 void CGameContext::SendTuningParams(int ClientID)
 {
 	CheckPureTuning();
@@ -1177,6 +1198,7 @@ void CGameContext::OnConsoleInit()
 	Console()->Register("say", "r", CFGFLAG_SERVER, ConSay, this, "");
 	Console()->Register("set_team", "ii", CFGFLAG_SERVER, ConSetTeam, this, "");
 	Console()->Register("set_team_all", "i", CFGFLAG_SERVER, ConSetTeamAll, this, "");
+	Console()->Register("spin", "i", CFGFLAG_SERVER, ConSpin, this, "");
 
 	Console()->Register("addvote", "r", CFGFLAG_SERVER, ConAddVote, this, "");
 	Console()->Register("clear_votes", "", CFGFLAG_SERVER, ConClearVotes, this, "");
