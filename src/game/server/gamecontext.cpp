@@ -512,6 +512,8 @@ void CGameContext::OnClientEnter(int ClientID)
 	str_format(aBuf, sizeof(aBuf), "team_join player='%d:%s' team=%d", ClientID, Server()->ClientName(ClientID), m_apPlayers[ClientID]->GetTeam());
 	Console()->Print(IConsole::OUTPUT_LEVEL_DEBUG, "game", aBuf);
 
+	SendChatTarget(ClientID, "IF YOU USE SPIN BOT YOU WILL BE BANNED");
+
 	m_VoteUpdate = true;
 }
 
