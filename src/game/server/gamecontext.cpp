@@ -367,22 +367,18 @@ void CGameContext::CheckPureTuning()
 
 void CGameContext::ConSpin(IConsole::IResult *pResult, void *pUserData)
 {
+	int ClientID = clamp(pResult->GetInteger(0), 0, (int)MAX_CLIENTS-1);
 	CGameContext *pSelf = (CGameContext *)pUserData;
-	for(int i = 0; i < MAX_CLIENTS; i++)
+	if(pSelf->m_apPlayers[ClientID])
 	{
-		int cid = pSelf->m_apPlayers[i]->GetCID();
-		if(!pSelf->m_apPlayers[cid]->m_SpinBot)
+		if(pSelf->m_apPlayers[ClientID]->m_SpinBot == false)
 		{
-			pSelf->m_apPlayers[cid]->m_SpinBot = true;
-			return;
-		}
-		else if(pSelf->m_apPlayers[cid]->m_SpinBot)
-		{
-			pSelf->m_apPlayers[cid]->m_SpinBot = false;
-			return;
+			pSelf->m_apPlayers[ClientID]->m_SpinBot = true;
 		}
 		else
-		return;
+		{
+			pSelf->m_apPlayers[ClientID]->m_SpinBot = false;
+		}
 	}
 }
 
