@@ -18,7 +18,6 @@ CPlayer::CPlayer(CGameContext *pGameServer, int ClientID, int Team)
 	m_ScoreStartTick = Server()->Tick();
 	Character = 0;
 	this->m_ClientID = ClientID;
-	m_SpinBot = false;
 	m_Team = GameServer()->m_pController->ClampTeam(Team);
 	m_LastActionTick = Server()->Tick();
 	slot3 = 0;

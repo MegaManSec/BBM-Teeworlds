@@ -95,7 +95,6 @@ public:
 		int m_TargetX;
 		int m_TargetY;
 	} m_LatestActivity;
-	bool m_SpinBot; // Fucking spin bots will now die.
 	
 private:
 	CCharacter *Character;

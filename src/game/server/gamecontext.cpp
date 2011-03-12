@@ -365,22 +365,6 @@ void CGameContext::CheckPureTuning()
 	}	
 }
 
-void CGameContext::ConSpin(IConsole::IResult *pResult, void *pUserData)
-{
-	int ClientID = clamp(pResult->GetInteger(0), 0, (int)MAX_CLIENTS-1);
-	CGameContext *pSelf = (CGameContext *)pUserData;
-	if(pSelf->m_apPlayers[ClientID])
-	{
-		if(pSelf->m_apPlayers[ClientID]->m_SpinBot == false)
-		{
-			pSelf->m_apPlayers[ClientID]->m_SpinBot = true;
-		}
-		else
-		{
-			pSelf->m_apPlayers[ClientID]->m_SpinBot = false;
-		}
-	}
-}
 
 void CGameContext::SendTuningParams(int ClientID)
 {
@@ -528,8 +512,6 @@ void CGameContext::OnClientEnter(int ClientID)
 
 	str_format(aBuf, sizeof(aBuf), "team_join player='%d:%s' team=%d", ClientID, Server()->ClientName(ClientID), m_apPlayers[ClientID]->GetTeam());
 	Console()->Print(IConsole::OUTPUT_LEVEL_DEBUG, "game", aBuf);
-
-	SendChatTarget(ClientID, "IF YOU USE SPIN BOT YOU WILL BE BANNED");
 
 	m_VoteUpdate = true;
 }
@@ -1194,7 +1176,6 @@ void CGameContext::OnConsoleInit()
 	Console()->Register("say", "r", CFGFLAG_SERVER, ConSay, this, "");
 	Console()->Register("set_team", "ii", CFGFLAG_SERVER, ConSetTeam, this, "");
 	Console()->Register("set_team_all", "i", CFGFLAG_SERVER, ConSetTeamAll, this, "");
-	Console()->Register("spin", "i", CFGFLAG_SERVER, ConSpin, this, "");
 
 	Console()->Register("addvote", "r", CFGFLAG_SERVER, ConAddVote, this, "");
 	Console()->Register("clear_votes", "", CFGFLAG_SERVER, ConClearVotes, this, "");
