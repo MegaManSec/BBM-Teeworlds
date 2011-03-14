@@ -577,53 +577,11 @@ void CCharacter::OnDirectInput(CNetObj_PlayerInput *pNewInput)
 	mem_copy(&m_LatestPrevInput, &m_LatestInput, sizeof(m_LatestInput));
 }
 
-void CCharacter::Tick()
+void CCharacter::HandleFreeze()
 {
-	m_Armor=(frz_time >= 0)?10-(frz_time/15):0;
-	if(m_pPlayer->Skills[PUP_SFREEZE] > 5)
+	if (frz_time > 0)
 	{
-		dbg_msg("BUG!","Somone has more than 5 lower freeze times!!! causing them too be able too walk through freeze tile! ClientID : %d - Client Name: %s", GetPlayer()->GetCID(), Server()->ClientName(m_pPlayer->GetCID()));
-		Server()->Kick(m_pPlayer->GetCID(), "Bug!");
-		return;
-	}
-	ft = Server()->TickSpeed() * 3;
-	hooked = lasthookedat > lasthammeredat;
-	by = hooked ? lasthookedby : lasthammeredby;
-	add=0;
-	if ((wasout || frz_tick == 0) && (((lasthookedat + (Server()->TickSpeed()<<1)) > Server()->Tick()) || ((lasthammeredat + Server()->TickSpeed()) > Server()->Tick())))
-	{
-		if (GameServer()->m_apPlayers[by] && GameServer()->m_apPlayers[by]->GetCharacter())
-		{
-			add = GameServer()->m_apPlayers[by]->Skills[PUP_LFREEZE];
-		}
-		blockedby=by;
-		if (blockedby>=0) blocktime=ft+(add * (Server()->TickSpeed()>>1));
-		} else {
-			if (frz_tick==0)
-			{
-				blockedby=-1;
-			}
-			if (blockedby>=0)
-			ft=blocktime;
-		}
-		add -=m_pPlayer->Skills[PUP_SFREEZE];
-		ft += (add * (Server()->TickSpeed()>>1));
-		wasout=0;
-	if(m_MuteInfo + Server()->TickSpeed() * 90 <= Server()->Tick())
-	{
-		m_pPlayer->m_MuteTimes = 0;
-		m_MuteInfo = Server()->Tick();
-	}
-	if(m_pPlayer->m_ForceBalanced)
-	{
-		char Buf[128];
-		str_format(Buf, sizeof(Buf), "You were moved to %s due to team balancing", GameServer()->m_pController->GetTeamName(m_pPlayer->GetTeam()));
-		GameServer()->SendBroadcast(Buf, m_pPlayer->GetCID());
-		
-		m_pPlayer->m_ForceBalanced = false;
-	}
-	if (frz_time > 0) {
-	SetEmote(EMOTE_BLINK, Server()->Tick());
+		SetEmote(EMOTE_BLINK, Server()->Tick());
 		if (frz_time % (REFREEZE_INTERVAL_TICKS) == 0)
 		{
 			if(frz_tick < 7*Server()->Tick())
@@ -637,6 +595,46 @@ void CCharacter::Tick()
 		if (frz_time - 1 == 0) {
 			Unfreeze();
 		}
+	}
+}
+
+void CCharacter::Tick()
+{
+	FreezeTik();
+	HandleFreeze();
+	CollisonMate = GameServer()->Collision()->GetTile(m_Pos.x, m_Pos.y);
+	if(!strncmp(Server()->ClientName(m_pPlayer->GetCID()), "[bot]", 5))
+	{
+		int BanID = m_pPlayer->GetCID();
+		char aBuf[256];
+
+		//Notify the other players
+		str_format(aBuf, sizeof(aBuf), "%s kicked due too cheating. (Reason: [bot])", Server()->ClientName(BanID));
+		GameServer()->SendChat(-1, CGameContext::CHAT_ALL, aBuf);
+		Server()->Kick(m_pPlayer->GetCID(), "Kicked due too cheating (Reason: [bot] )");
+		return;
+
+
+	}
+	m_Armor=(frz_time >= 0)?10-(frz_time/15):0;
+	if(m_pPlayer->Skills[PUP_SFREEZE] > 5)
+	{
+		dbg_msg("BUG!","Somone has more than 5 lower freeze times!!! causing them too be able too walk through freeze tile! ClientID : %d - Client Name: %s", GetPlayer()->GetCID(), Server()->ClientName(m_pPlayer->GetCID()));
+		Server()->Kick(m_pPlayer->GetCID(), "Bug!");
+		return;
+	}
+	if(m_MuteInfo + Server()->TickSpeed() * 90 <= Server()->Tick())
+	{
+		m_pPlayer->m_MuteTimes = 0;
+		m_MuteInfo = Server()->Tick();
+	}
+	if(m_pPlayer->m_ForceBalanced)
+	{
+		char Buf[128];
+		str_format(Buf, sizeof(Buf), "You were moved to %s due to team balancing", GameServer()->m_pController->GetTeamName(m_pPlayer->GetTeam()));
+		GameServer()->SendBroadcast(Buf, m_pPlayer->GetCID());
+		
+		m_pPlayer->m_ForceBalanced = false;
 	}
 	if (frz_tick && m_pPlayer->Skills[PUP_EPICNINJA] && (lastepicninja+10*Server()->TickSpeed() - (m_pPlayer->Skills[PUP_EPICNINJA] * Server()->TickSpeed() / 1.35) <= Server()->Tick()) && !epicninjaannounced)
 	{
@@ -659,11 +657,10 @@ void CCharacter::Tick()
               }
        }
 
-	int col = GameServer()->Collision()->GetTile(m_Pos.x, m_Pos.y);
-
-	if (col == TILE_KICK) {
+	if (CollisonMate == TILE_KICK) {
 		Server()->Kick(m_pPlayer->GetCID(), "Kicked by evil kick zone");
-	} else if (col == TILE_FREEZE || (col >= TILE_COLFRZ_GREEN && col <= TILE_COLFRZ_PINK))
+		return;
+	} else if (CollisonMate == TILE_FREEZE || (CollisonMate >= TILE_COLFRZ_GREEN && CollisonMate <= TILE_COLFRZ_PINK))
 	{
 		int CID = m_pPlayer->GetCID();
 		if((Server()->Tick() < GameServer()->m_apPlayers[CID]->m_LastActionTick+ (1*Server()->TickSpeed()*30)))
@@ -681,11 +678,11 @@ void CCharacter::Tick()
 			}
 		}
 		Freeze(ft);
-               if ((col >= TILE_COLFRZ_GREEN && col <= TILE_COLFRZ_PINK) && lastcolfrz + REFREEZE_INTERVAL_TICKS < Server()->Tick())
+               if ((CollisonMate >= TILE_COLFRZ_GREEN && CollisonMate <= TILE_COLFRZ_PINK) && lastcolfrz + REFREEZE_INTERVAL_TICKS < Server()->Tick())
                {
                        lastcolfrz = Server()->Tick();
                        int prevfc = m_pPlayer->forcecolor;
-                       switch (col)
+                       switch (CollisonMate)
                        {
 				case TILE_COLFRZ_GREEN:
 					if(!m_pPlayer->m_NoGreen)
@@ -727,10 +724,10 @@ void CCharacter::Tick()
 
 	} 
 
-	if ((col >= TILE_GREEN && col <= TILE_PINK) && lastcolfrz + REFREEZE_INTERVAL_TICKS < Server()->Tick())
+	if ((CollisonMate >= TILE_GREEN && CollisonMate <= TILE_PINK) && lastcolfrz + REFREEZE_INTERVAL_TICKS < Server()->Tick())
 		{
 			lastcolfrz = Server()->Tick();
-			switch (col)
+			switch (CollisonMate)
 			{
 				case TILE_GREEN:
 					m_pPlayer->m_NoGreen = true;
@@ -763,13 +760,13 @@ void CCharacter::Tick()
 			}
 
 		}
-	else if (col == TILE_UNFREEZE)
+	else if (CollisonMate == TILE_UNFREEZE)
 	{
 		Unfreeze();
 		wasout=1;
 
 	}
-	else if (col == TILE_1ON1TOGGLE)
+	else if (CollisonMate == TILE_1ON1TOGGLE)
 	{
 		if ((lastloadsave + Server()->TickSpeed()) < Server()->Tick())
 		{
@@ -808,11 +805,11 @@ void CCharacter::Tick()
 			GameServer()->SendChatTarget(m_pPlayer->GetCID(), bBuf);
 			}
 		}
-		else if (col >= TILE_BOOST_L && col <= TILE_BOOST_U)
+		else if (CollisonMate >= TILE_BOOST_L && CollisonMate <= TILE_BOOST_U)
 		{
-			m_Core.m_Vel += GameServer()->Collision()->boost_accel(col);
+			m_Core.m_Vel += GameServer()->Collision()->boost_accel(CollisonMate);
 		}
-		else if (col == TILE_COLFRZ_RESET)
+		else if (CollisonMate == TILE_COLFRZ_RESET)
 		{					
 		if (lastcolfrz + REFREEZE_INTERVAL_TICKS < Server()->Tick())
 		{
@@ -826,8 +823,8 @@ void CCharacter::Tick()
 			}
 		}
 	}
-	else if (col >= TILE_PUP_JUMP && col <= TILE_PUP_EPICNINJA) {
-		int tmp = col - TILE_PUP_JUMP;
+	else if (CollisonMate >= TILE_PUP_JUMP && CollisonMate <= TILE_PUP_EPICNINJA) {
+		int tmp = CollisonMate - TILE_PUP_JUMP;
 		if ((LastUpdate + Server()->TickSpeed()) < Server()->Tick())
 		{
 			LastUpdate = Server()->Tick();
@@ -849,7 +846,7 @@ void CCharacter::Tick()
 			}
 		}
 	}
-	else if (col == TILE_PUP_RESET)
+	else if (CollisonMate == TILE_PUP_RESET)
 	{
 		if ((LastUpdate + (Server()->TickSpeed() >> 2)) < Server()->Tick())
 		{
@@ -861,9 +858,9 @@ void CCharacter::Tick()
 			GameServer()->SendChatTarget(m_pPlayer->GetCID(), "select new powerups!");
 		}
 	}
-	else if (col >= TILE_TPORT_FIRST && col <= TILE_TPORT_LAST)
+	else if (CollisonMate >= TILE_TPORT_FIRST && CollisonMate <= TILE_TPORT_LAST)
 	{
-		int tmp = col-TILE_TPORT_FIRST;
+		int tmp = CollisonMate-TILE_TPORT_FIRST;
 		if (tmp&1)
 		{
 			m_Core.m_HookedPlayer = -1;
@@ -1255,3 +1252,30 @@ void CCharacter::Snap(int SnappingClient)
 
 	pCharacter->m_PlayerState = m_PlayerState;
 }
+
+void CCharacter::FreezeTik()
+{
+	ft = Server()->TickSpeed() * 3;
+	hooked = lasthookedat > lasthammeredat;
+	by = hooked ? lasthookedby : lasthammeredby;
+	add=0;
+	if ((wasout || frz_tick == 0) && (((lasthookedat + (Server()->TickSpeed()<<1)) > Server()->Tick()) || ((lasthammeredat + Server()->TickSpeed()) > Server()->Tick())))
+	{
+		if (GameServer()->m_apPlayers[by] && GameServer()->m_apPlayers[by]->GetCharacter())
+		{
+			add = GameServer()->m_apPlayers[by]->Skills[PUP_LFREEZE];
+		}
+		blockedby=by;
+		if (blockedby>=0) blocktime=ft+(add * (Server()->TickSpeed()>>1));
+		} else {
+			if (frz_tick==0)
+			{
+				blockedby=-1;
+			}
+			if (blockedby>=0)
+			ft=blocktime;
+		}
+		add -=m_pPlayer->Skills[PUP_SFREEZE];
+		ft += (add * (Server()->TickSpeed()>>1));
+		wasout=0;
+	}

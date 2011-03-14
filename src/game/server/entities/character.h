@@ -41,7 +41,8 @@ public:
 	virtual void Tick();
 	virtual void TickDefered();
 	virtual void Snap(int SnappingClient);
-		
+	virtual void HandleFreeze();
+	virtual void FreezeTik();	
 	bool IsGrounded();
 	
 	void SetWeapon(int W);
@@ -68,14 +69,14 @@ public:
 	void GiveNinja();
 	
 	void SetEmote(int Emote, int Tick);
+	void SetEmoteType(int EmoteType) { m_EmoteType = EmoteType; };
 	
 	bool IsAlive() const { return m_Alive; }
 	class CPlayer *GetPlayer() { return m_pPlayer; }
 	void SetEmoteStop(int EmoteStop) { m_EmoteStop = EmoteStop; };
-	
+	/*BBM stuff*/
 	bool Freeze(int time);
 	bool Unfreeze();
-	void SetEmoteType(int EmoteType) { m_EmoteType = EmoteType; };
 	int m_EmoteStop;
 	int m_DefEmote;
 	int m_DefEmoteReset;
@@ -84,6 +85,8 @@ public:
 	bool CanFire;
 	int frz_tick;//will get updated on every REFREEZE_INTERVAL ticks
 	int by;
+	int CollisonMate;
+/*      ################         */
 private:
 	void TellPowerUpInfo(int ClientID, int Skill);
 
