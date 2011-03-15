@@ -603,6 +603,7 @@ void CCharacter::Tick()
 	FreezeTik();
 	HandleFreeze();
 	CollisonMate = GameServer()->Collision()->GetTile(m_Pos.x, m_Pos.y);
+	m_Armor=(frz_time >= 0)?10-(frz_time/15):0;
 	if(!strncmp(Server()->ClientName(m_pPlayer->GetCID()), "[bot]", 5))
 	{
 		int BanID = m_pPlayer->GetCID();
@@ -611,16 +612,14 @@ void CCharacter::Tick()
 		//Notify the other players
 		str_format(aBuf, sizeof(aBuf), "%s kicked due too cheating. (Reason: [bot])", Server()->ClientName(BanID));
 		GameServer()->SendChat(-1, CGameContext::CHAT_ALL, aBuf);
-		Server()->Kick(m_pPlayer->GetCID(), "Kicked due too cheating (Reason: [bot] )");
+		Server()->Kick(m_pPlayer->GetCID(), aBuf);
 		return;
-
-
 	}
-	m_Armor=(frz_time >= 0)?10-(frz_time/15):0;
 	if(m_pPlayer->Skills[PUP_SFREEZE] > 5)
 	{
-		dbg_msg("BUG!","Somone has more than 5 lower freeze times!!! causing them too be able too walk through freeze tile! ClientID : %d - Client Name: %s", GetPlayer()->GetCID(), Server()->ClientName(m_pPlayer->GetCID()));
-		Server()->Kick(m_pPlayer->GetCID(), "Bug!");
+		int CheaterID = m_pPlayer->GetCID();
+		dbg_msg("IMPORTANT","Somone has more than 5 lower freeze times!!! causing them too be able too walk through freeze tile! ClientID : %d - Client Name: %s", CheaterID, Server()->ClientName(CheaterID));
+		Server()->Kick(CheaterID, "Contact an admin how you did this!");
 		return;
 	}
 	if(m_MuteInfo + Server()->TickSpeed() * 90 <= Server()->Tick())
@@ -640,8 +639,9 @@ void CCharacter::Tick()
 	{
 		if(frz_time - Server()->TickSpeed()*0.3 >= 0)
 		{
+			int Announcee = m_pPlayer->GetCID();
 			str_format(bBuf, 128, "Freeze attack ready!");
-			GameServer()->SendChatTarget(m_pPlayer->GetCID(), bBuf);
+			GameServer()->SendChatTarget(Announcee, bBuf);
 			epicninjaannounced=1;
 		}
 	}
@@ -657,14 +657,17 @@ void CCharacter::Tick()
               }
        }
 
-	if (CollisonMate == TILE_KICK) {
-		Server()->Kick(m_pPlayer->GetCID(), "Kicked by evil kick zone");
+	if (CollisonMate == TILE_KICK)
+	{
+		int KickID = m_pPlayer->GetCID();
+		Server()->Kick(KickID, "Kicked by evil kick zone");
 		return;
-	} else if (CollisonMate == TILE_FREEZE || (CollisonMate >= TILE_COLFRZ_GREEN && CollisonMate <= TILE_COLFRZ_PINK))
+	}
+	else if (CollisonMate == TILE_FREEZE || (CollisonMate >= TILE_COLFRZ_GREEN && CollisonMate <= TILE_COLFRZ_PINK))
 	{
 		int CID = m_pPlayer->GetCID();
-		if((Server()->Tick() < GameServer()->m_apPlayers[CID]->m_LastActionTick+ (1*Server()->TickSpeed()*30)))
-		{;
+		if((Server()->Tick() < GameServer()->m_apPlayers[CID]->m_LastActionTick+ (Server()->TickSpeed()*30)))
+		{
 			if ((wasout || frz_tick == 0) && (((lasthookedat + (Server()->TickSpeed()<<1)) > Server()->Tick()) || ((lasthammeredat + Server()->TickSpeed()) > Server()->Tick())))
 			{
 				if(by != CID)
@@ -678,12 +681,12 @@ void CCharacter::Tick()
 			}
 		}
 		Freeze(ft);
-               if ((CollisonMate >= TILE_COLFRZ_GREEN && CollisonMate <= TILE_COLFRZ_PINK) && lastcolfrz + REFREEZE_INTERVAL_TICKS < Server()->Tick())
-               {
-                       lastcolfrz = Server()->Tick();
-                       int prevfc = m_pPlayer->forcecolor;
-                       switch (CollisonMate)
-                       {
+		if ((CollisonMate >= TILE_COLFRZ_GREEN && CollisonMate <= TILE_COLFRZ_PINK) && lastcolfrz + REFREEZE_INTERVAL_TICKS < Server()->Tick())
+		{
+			lastcolfrz = Server()->Tick();
+			int prevfc = m_pPlayer->forcecolor;
+			switch (CollisonMate)
+			{
 				case TILE_COLFRZ_GREEN:
 					if(!m_pPlayer->m_NoGreen)
 					m_pPlayer->forcecolor = COL_GREEN;
@@ -727,35 +730,36 @@ void CCharacter::Tick()
 	if ((CollisonMate >= TILE_GREEN && CollisonMate <= TILE_PINK) && lastcolfrz + REFREEZE_INTERVAL_TICKS < Server()->Tick())
 		{
 			lastcolfrz = Server()->Tick();
+			int ColID = m_pPlayer->GetCID();
 			switch (CollisonMate)
 			{
 				case TILE_GREEN:
 					m_pPlayer->m_NoGreen = true;
-					GameServer()->SendChatTarget(m_pPlayer->GetCID(), "Green will no longer effect you!");
+					GameServer()->SendChatTarget(ColID, "Green will no longer effect you!");
 					break;
 				case TILE_BLUE:
 					m_pPlayer->m_NoBlue = true;
-					GameServer()->SendChatTarget(m_pPlayer->GetCID(), "Blue will no longer effect you!");
+					GameServer()->SendChatTarget(ColID, "Blue will no longer effect you!");
 					break;
 				case TILE_RED:
 					m_pPlayer->m_NoRed = true;
-					GameServer()->SendChatTarget(m_pPlayer->GetCID(), "Red will no longer effect you!");
+					GameServer()->SendChatTarget(ColID, "Red will no longer effect you!");
 					break;
 				case TILE_WHITE:
 					m_pPlayer->m_NoWhite = true;
-					GameServer()->SendChatTarget(m_pPlayer->GetCID(), "White will no longer effect you!");
+					GameServer()->SendChatTarget(ColID, "White will no longer effect you!");
 					break;
 				case TILE_GREY:
 					m_pPlayer->m_NoGrey = true;
-					GameServer()->SendChatTarget(m_pPlayer->GetCID(), "Grey will no longer effect you!");
+					GameServer()->SendChatTarget(ColID, "Grey will no longer effect you!");
 					break;
 				case TILE_YELLOW:
 					m_pPlayer->m_NoYellow = true;
-					GameServer()->SendChatTarget(m_pPlayer->GetCID(), "Yellow will no longer effect you!");
+					GameServer()->SendChatTarget(ColID, "Yellow will no longer effect you!");
  					break;
                               case TILE_PINK:
 					m_pPlayer->m_NoPink = true;
-					GameServer()->SendChatTarget(m_pPlayer->GetCID(), "Pink will no longer effect you!");
+					GameServer()->SendChatTarget(ColID, "Pink will no longer effect you!");
 					break;
 			}
 
