@@ -34,7 +34,7 @@ void CControls::OnReset()
 
 void CControls::OnRelease()
 {
-	OnReset();
+	//OnReset();
 }
 
 void CControls::OnPlayerDeath()
@@ -126,7 +126,7 @@ int CControls::SnapInput(int *pData)
 	// we freeze the input if chat or menu is activated
 	if(m_InputData.m_PlayerState != PLAYERSTATE_PLAYING)
 	{
-		OnReset();
+		//OnReset();
 			
 		mem_copy(pData, &m_InputData, sizeof(m_InputData));
 

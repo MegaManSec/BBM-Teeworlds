@@ -479,8 +479,8 @@ void CGameClient::OnRender()
 void CGameClient::OnRelease()
 {
 	// release all systems
-	for(int i = 0; i < m_All.m_Num; i++)
-		m_All.m_paComponents[i]->OnRelease();
+//	for(int i = 0; i < m_All.m_Num; i++)
+	//	m_All.m_paComponents[i]->OnRelease();
 }
 
 void CGameClient::OnMessage(int MsgId, CUnpacker *pUnpacker)
@@ -972,7 +972,7 @@ void CGameClient::OnPredict()
 
 void CGameClient::OnActivateEditor()
 {
-	OnRelease();
+	//OnRelease();
 }
 
 void CGameClient::CClientData::UpdateRenderInfo()
