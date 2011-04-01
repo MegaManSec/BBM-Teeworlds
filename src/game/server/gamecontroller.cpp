@@ -57,22 +57,63 @@ float IGameController::EvaluateSpawnPos(CSpawnEval *pEval, vec2 Pos)
 	return Score;
 }
 
-void IGameController::EvaluateSpawnType(CSpawnEval *pEval, int T)
+void IGameController::EvaluateSpawnType(CSpawnEval *pEval, int Type)
 {
 	// get spawn point
-	for(int i  = 0; i < m_aNumSpawnPoints[T]; i++)
+	for(int i  = 0; i < m_aNumSpawnPoints[Type]; i++)
 	{
 		// check if the position is occupado
-		if(GameServer()->m_World.FindEntities(m_aaSpawnPoints[T][i], 64, 0, 1, CGameWorld::ENTTYPE_CHARACTER))
+		if(GameServer()->m_World.FindEntities(m_aaSpawnPoints[Type][i], 64, 0, 1, CGameWorld::ENTTYPE_CHARACTER))
 			continue;
 
-		vec2 P = m_aaSpawnPoints[T][i];
+		vec2 P = m_aaSpawnPoints[Type][i];
 		float S = EvaluateSpawnPos(pEval, P);
 		if(!pEval->m_Got || pEval->m_Score > S)
 		{
 			pEval->m_Got = true;
 			pEval->m_Score = S;
 			pEval->m_Pos = P;
+		}
+	}
+}
+
+void IGameController::FindFreeSpawn(CSpawnEval *pEval, int Type)
+{
+	// pick the spawn point that is least occupied and has free space for spawning around it
+	for(int i  = 0; i < m_aNumSpawnPoints[Type]; i++)
+	{
+
+		CCharacter *aEnts[MAX_CLIENTS];
+		int Num = GameServer()->m_World.FindEntities(m_aaSpawnPoints[Type][i], 64, (CEntity**)aEnts, MAX_CLIENTS, CGameWorld::ENTTYPE_CHARACTER);
+		float Score = 0.0f;
+		for(int c = 0; c < Num; ++c)
+			Score += 96.0f - distance(aEnts[c]->m_Pos, m_aaSpawnPoints[Type][i]);
+			
+		if(!pEval->m_Got || pEval->m_Score > Score)
+		{
+			// start, left, up, right, down
+			vec2 Positions[5] = { vec2(0.0f, 0.0f), vec2(-32.0f, 0.0f), vec2(0.0f, -32.0f), vec2(32.0f, 0.0f), vec2(0.0f, 32.0f) };
+
+			// check for free space
+			int Result = -1;
+			for(int Index = 0; Index < 5 && Result == -1; ++Index)
+			{
+				Result = Index;
+				for(int c = 0; c < Num; ++c)
+					if(GameServer()->Collision()->CheckPoint(m_aaSpawnPoints[Type][i]+Positions[Index]) ||
+						distance(aEnts[c]->m_Pos, m_aaSpawnPoints[Type][i]+Positions[Index]) <= aEnts[c]->m_ProximityRadius)
+					{
+						Result = -1;
+						break;
+					}
+			}
+
+			if(Result == -1)
+				continue;	// try next spawn point
+
+			pEval->m_Got = true;
+			pEval->m_Score = Score;
+			pEval->m_Pos = m_aaSpawnPoints[Type][i]+Positions[Result];
 		}
 	}
 }
@@ -103,6 +144,28 @@ bool IGameController::CanSpawn(int Team, vec2 *pOutPos)
 		EvaluateSpawnType(&Eval, 0);
 		EvaluateSpawnType(&Eval, 1);
 		EvaluateSpawnType(&Eval, 2);
+	}
+
+	// handle crappy maps
+	if(!Eval.m_Got)
+	{
+		if(IsTeamplay())
+		{
+			// first try own team spawn, then normal spawn and then enemy
+			FindFreeSpawn(&Eval, 1+(Team&1));
+			if(!Eval.m_Got)
+			{
+				FindFreeSpawn(&Eval, 0);
+				if(!Eval.m_Got)
+					FindFreeSpawn(&Eval, 1+((Team+1)&1));
+			}
+		}
+		else
+		{
+			FindFreeSpawn(&Eval, 0);
+			FindFreeSpawn(&Eval, 1);
+			FindFreeSpawn(&Eval, 2);
+		}
 	}
 	
 	*pOutPos = Eval.m_Pos;
@@ -304,11 +367,16 @@ void IGameController::OnPlayerInfoChange(class CPlayer *pP)
 	const int aTeamColors[2] = {65387, 10223467};
 	if(IsTeamplay())
 	{
+		pP->m_TeeInfos.m_UseCustomColor = 1;
 		if(pP->GetTeam() >= TEAM_RED && pP->GetTeam() <= TEAM_BLUE)
 		{
-			pP->m_TeeInfos.m_UseCustomColor = 1;
 			pP->m_TeeInfos.m_ColorBody = aTeamColors[pP->GetTeam()];
 			pP->m_TeeInfos.m_ColorFeet = aTeamColors[pP->GetTeam()];
+		}
+		else
+		{
+			pP->m_TeeInfos.m_ColorBody = 12895054;
+			pP->m_TeeInfos.m_ColorFeet = 12895054;
 		}
 	}
 }
@@ -328,6 +396,8 @@ int IGameController::OnCharacterDeath(class CCharacter *pVictim, class CPlayer *
 		else
 			return 0;
 	}
+	if(Weapon == WEAPON_SELF)
+		pVictim->GetPlayer()->m_RespawnTick = Server()->Tick()+Server()->TickSpeed()*3.0f;
 	return 0;
 }
 
@@ -498,33 +568,6 @@ void IGameController::Tick()
 			}
 		}
 	}
-	
-	// update browse info
-	int Prog = -1;
-	if(g_Config.m_SvTimelimit > 0)
-		Prog = max(Prog, (Server()->Tick()-m_RoundStartTick) * 100 / (g_Config.m_SvTimelimit*Server()->TickSpeed()*60));
-
-	if(g_Config.m_SvScorelimit)
-	{
-		if(IsTeamplay())
-		{
-			Prog = max(Prog, (m_aTeamscore[TEAM_RED]*100)/g_Config.m_SvScorelimit);
-			Prog = max(Prog, (m_aTeamscore[TEAM_BLUE]*100)/g_Config.m_SvScorelimit);
-		}
-		else
-		{
-			for(int i = 0; i < MAX_CLIENTS; i++)
-			{
-				if(GameServer()->m_apPlayers[i])
-					Prog = max(Prog, (GameServer()->m_apPlayers[i]->m_Score*100)/g_Config.m_SvScorelimit);
-			}
-		}
-	}
-
-	if(m_Warmup)
-		Prog = -1;
-		
-	Server()->SetBrowseInfo(m_pGameType, Prog);
 }
 
 
@@ -535,37 +578,26 @@ bool IGameController::IsTeamplay() const
 
 void IGameController::Snap(int SnappingClient)
 {
-	CNetObj_Game *pGameObj = (CNetObj_Game *)Server()->SnapNewItem(NETOBJTYPE_GAME, 0, sizeof(CNetObj_Game));
-	if(!pGameObj)
+	CNetObj_GameInfo *pGameInfoObj = (CNetObj_GameInfo *)Server()->SnapNewItem(NETOBJTYPE_GAMEINFO, 0, sizeof(CNetObj_GameInfo));
+	if(!pGameInfoObj)
 		return;
 
-	pGameObj->m_Paused = GameServer()->m_World.m_Paused;
-	pGameObj->m_GameOver = m_GameOverTick==-1?0:1;
-	pGameObj->m_SuddenDeath = m_SuddenDeath;
+	pGameInfoObj->m_GameFlags = m_GameFlags;
+	pGameInfoObj->m_GameStateFlags = 0;
+	if(m_GameOverTick != -1)
+		pGameInfoObj->m_GameStateFlags |= GAMESTATEFLAG_GAMEOVER;
+	if(m_SuddenDeath)
+		pGameInfoObj->m_GameStateFlags |= GAMESTATEFLAG_SUDDENDEATH;
+	if(GameServer()->m_World.m_Paused)
+		pGameInfoObj->m_GameStateFlags |= GAMESTATEFLAG_PAUSED;
+	pGameInfoObj->m_RoundStartTick = m_RoundStartTick;
+	pGameInfoObj->m_WarmupTimer = m_Warmup;
+
+	pGameInfoObj->m_ScoreLimit = g_Config.m_SvScorelimit;
+	pGameInfoObj->m_TimeLimit = g_Config.m_SvTimelimit;
 	
-	pGameObj->m_ScoreLimit = g_Config.m_SvScorelimit;
-	pGameObj->m_TimeLimit = g_Config.m_SvTimelimit;
-	pGameObj->m_RoundStartTick = m_RoundStartTick;
-	pGameObj->m_Flags = m_GameFlags;
-	
-	pGameObj->m_Warmup = m_Warmup;
-	
-	pGameObj->m_RoundNum = (str_length(g_Config.m_SvMaprotation) && g_Config.m_SvRoundsPerMap) ? g_Config.m_SvRoundsPerMap : 0;
-	pGameObj->m_RoundCurrent = m_RoundCount+1;
-	
-	
-	if(SnappingClient == -1)
-	{
-		// we are recording a demo, just set the scores
-		pGameObj->m_TeamscoreRed = m_aTeamscore[TEAM_RED];
-		pGameObj->m_TeamscoreBlue = m_aTeamscore[TEAM_BLUE];
-	}
-	else
-	{
-		// TODO: this little hack should be removed
-		pGameObj->m_TeamscoreRed = IsTeamplay() ? m_aTeamscore[TEAM_RED] : GameServer()->m_apPlayers[SnappingClient]->m_Score;
-		pGameObj->m_TeamscoreBlue = m_aTeamscore[TEAM_BLUE];
-	}
+	pGameInfoObj->m_RoundNum = (str_length(g_Config.m_SvMaprotation) && g_Config.m_SvRoundsPerMap) ? g_Config.m_SvRoundsPerMap : 0;
+	pGameInfoObj->m_RoundCurrent = m_RoundCount+1;
 }
 
 int IGameController::GetAutoTeam(int NotThisID)

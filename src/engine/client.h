@@ -80,6 +80,7 @@ public:
 	virtual void DemoRecorder_HandleAutoStart() = 0;
 	virtual void DemoRecorder_Stop() = 0;
 	virtual void AutoScreenshot_Start() = 0;
+	virtual void ServerBrowserUpdate() = 0;
 
 	// networking
 	virtual void EnterGame() = 0;
@@ -132,6 +133,8 @@ public:
 	virtual bool ConnectionProblems() = 0;
 
 	virtual bool SoundInitFailed() = 0;
+
+	virtual int GetDebugFont() = 0;
 };
 
 class IGameClient : public IInterface
@@ -156,6 +159,7 @@ public:
 	virtual int OnSnapInput(int *pData) = 0;
 	
 	virtual const char *GetItemName(int Type) = 0;
+	virtual int GetCountryIndex(int Code) = 0;
 	virtual const char *Version() = 0;
 	virtual const char *NetVersion() = 0;
 
