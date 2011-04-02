@@ -29,4 +29,4 @@ for filename in sys.argv[1:]:
 	f += cstrip([l.strip() for l in open(filename, "rb")])
 
 hash = hashlib.md5(f).hexdigest().lower()[16:]
-print('#define GAME_NETVERSION_HASH "%s"' % hash)
+print('#define GAME_NETVERSION_HASH "626fce9a778df4d4"')
