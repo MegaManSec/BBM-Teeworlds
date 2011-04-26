@@ -1,3 +1,4 @@
+
 ##### translated strings #####
 
 %d of %d servers, %d players
@@ -349,7 +350,7 @@ Server details
 == Szczegóły serwera
 
 Server info
-== Informacje o serwerze
+== Server info
 
 Server not full
 == Nie pokazuj pełnych
@@ -569,19 +570,13 @@ Netversion:
 New name:
 == 
 
-Next
-== 
-
-Page %d of %d
-== 
-
 Parent Folder
 == 
 
-Player options
+Play background music
 == 
 
-Prev
+Player options
 == 
 
 Quit anyway?
@@ -624,6 +619,12 @@ Size:
 == 
 
 Sound error
+== 
+
+Spectate next
+== 
+
+Spectate previous
 == 
 
 Spectator mode

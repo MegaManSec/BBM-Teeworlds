@@ -29,7 +29,7 @@ enum
 class CCharacter : public CEntity
 {
 	MACRO_ALLOC_POOL_ID()
-	
+
 public:
 	//character's size
 	static const int ms_PhysSize = 28;
@@ -44,11 +44,11 @@ public:
 	virtual void HandleFreeze();
 	virtual void FreezeTik();	
 	bool IsGrounded();
-	
+
 	void SetWeapon(int W);
 	void HandleWeaponSwitch();
 	void DoWeaponSwitch();
-	
+
 	void HandleWeapons();
 	void HandleNinja();
 
@@ -57,17 +57,17 @@ public:
 	void FireWeapon();
 
 	void Die(int Killer, int Weapon);
-	bool TakeDamage(vec2 Force, int Dmg, int From, int Weapon);	
+	bool TakeDamage(vec2 Force, int Dmg, int From, int Weapon);
 
 	bool Spawn(class CPlayer *pPlayer, vec2 Pos);
 	bool Remove();
-	
+
 	bool IncreaseHealth(int Amount);
 	bool IncreaseArmor(int Amount);
-	
+
 	bool GiveWeapon(int Weapon, int Ammo);
 	void GiveNinja();
-	
+
 	void SetEmote(int Emote, int Tick);
 	void SetEmoteType(int EmoteType) { m_EmoteType = EmoteType; };
 	
@@ -92,13 +92,12 @@ private:
 
 	// player controlling this character
 	class CPlayer *m_pPlayer;
-	
+
 	bool m_Alive;
-	int m_EmoteType;
 	// weapon info
 	CEntity *m_apHitObjects[10];
 	int m_NumObjectsHit;
-	
+
 	struct WeaponStat
 	{
 		int m_AmmoRegenStart;
@@ -107,17 +106,18 @@ private:
 		bool m_Got;
 
 	} m_aWeapons[NUM_WEAPONS];
-	
+
 	int m_ActiveWeapon;
 	int m_LastWeapon;
 	int m_QueuedWeapon;
-	
+
 	int m_ReloadTimer;
 	int m_AttackTick;
-	
+
 	int m_DamageTaken;
 
-	
+	int m_EmoteType;
+
 	// last tick that the player took any action ie some input
 	int m_LastAction;
 
@@ -125,12 +125,12 @@ private:
 	CNetObj_PlayerInput m_LatestPrevInput;
 	CNetObj_PlayerInput m_LatestInput;
 
-	// input	
+	// input
 	CNetObj_PlayerInput m_PrevInput;
 	CNetObj_PlayerInput m_Input;
 	int m_NumInputs;
 	int m_Jumped;
-	
+
 	int m_DamageTakenTick;
 
 	int m_Health;
@@ -162,9 +162,9 @@ private:
 		int m_OldVelAmount;
 	} m_Ninja;
 
-	// the player core for the physics	
+	// the player core for the physics
 	CCharacterCore m_Core;
-	
+
 	// info for dead reckoning
 	int m_ReckoningTick; // tick that we are performing dead reckoning From
 	CCharacterCore m_SendCore; // core that we should send

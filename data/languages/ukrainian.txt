@@ -582,19 +582,13 @@ Netversion:
 New name:
 == 
 
-Next
-== 
-
-Page %d of %d
-== 
-
 Parent Folder
 == 
 
-Player options
+Play background music
 == 
 
-Prev
+Player options
 == 
 
 Quit anyway?
@@ -631,6 +625,12 @@ Size:
 == 
 
 Sound error
+== 
+
+Spectate next
+== 
+
+Spectate previous
 == 
 
 Spectator mode

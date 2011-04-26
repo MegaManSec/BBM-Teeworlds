@@ -588,16 +588,10 @@ Netversion:
 New name:
 == 
 
-Next
-== 
-
-Page %d of %d
+Play background music
 == 
 
 Player options
-== 
-
-Prev
 == 
 
 Quit anyway?
@@ -634,6 +628,12 @@ Size:
 == 
 
 Sound error
+== 
+
+Spectate next
+== 
+
+Spectate previous
 == 
 
 Spectator mode
