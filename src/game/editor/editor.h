@@ -1,7 +1,7 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
-#ifndef GAME_EDITOR_ED_EDITOR_H
-#define GAME_EDITOR_ED_EDITOR_H
+#ifndef GAME_EDITOR_EDITOR_H
+#define GAME_EDITOR_EDITOR_H
 
 #include <base/system.h>
 #include <base/math.h>
@@ -697,7 +697,7 @@ public:
 	vec4 ButtonColorMul(const void *pID);
 
 	void DoQuadPoint(CQuad *pQuad, int QuadIndex, int v);
-	void DoMapEditor(CUIRect View, CUIRect Toolbar);
+	void DoMapEditor(CUIRect View, CUIRect Toolbar, bool ShowPicker);
 	void DoToolbar(CUIRect Toolbar);
 	void DoQuad(CQuad *pQuad, int Index);
 	float UiDoScrollbarV(const void *pID, const CUIRect *pRect, float Current);
