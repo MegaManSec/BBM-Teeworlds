@@ -484,8 +484,6 @@ void CCharacter::HandleWeapons()
 	//ninja
 	HandleNinja();
 
-	vec2 Direction = normalize(vec2(m_LatestInput.m_TargetX, m_LatestInput.m_TargetY));
-
 	// check reload timer
 	if(m_ReloadTimer)
 	{
