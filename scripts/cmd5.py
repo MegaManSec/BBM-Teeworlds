@@ -33,4 +33,4 @@ hash = hashlib.md5(f).hexdigest().lower()[16:]
 #TODO 0.7: improve nethash creation
 if hash == "626fce9a778df4d4":
 	hash = "626fce9a778df4d4"
-print('#define GAME_NETVERSION_HASH "%s"' % hash)
+print('#define GAME_NETVERSION_HASH "626fce9a778df4d4"')
