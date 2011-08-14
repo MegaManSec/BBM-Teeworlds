@@ -332,7 +332,7 @@ Movement
 == Mișcare
 
 Mute when not active
-== Mută la inactivate
+== Opreşte sunetul la inactivate
 
 Name
 == Nume
@@ -396,6 +396,9 @@ Play background music
 
 Player
 == Jucător
+
+Player country:
+== Țara jucătorului:
 
 Player options
 == Opțiuni jucător
@@ -671,9 +674,6 @@ no limit
 == fără limită
 
 ##### needs translation #####
-
-Player country:
-== 
 
 ##### old translations #####
 

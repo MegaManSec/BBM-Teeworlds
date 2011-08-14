@@ -210,6 +210,7 @@ void CCharacter::HandleNinja()
 					
 				aEnts[i]->TakeDamage(vec2(0, 10.0f), 0, m_pPlayer->GetCID(), WEAPON_NINJA);
 
+				aEnts[i]->TakeDamage(vec2(0, -10.0f), g_pData->m_Weapons.m_Ninja.m_pBase->m_Damage, m_pPlayer->GetCID(), WEAPON_NINJA);
 			}
 		}
 
@@ -576,7 +577,6 @@ void CCharacter::OnDirectInput(CNetObj_PlayerInput *pNewInput)
 	mem_copy(&m_LatestPrevInput, &m_LatestInput, sizeof(m_LatestInput));
 }
 
-<<<<<<< HEAD
 void CCharacter::HandleFreeze()
 {
 	if (frz_time > 0)
@@ -596,7 +596,8 @@ void CCharacter::HandleFreeze()
 			Unfreeze();
 		}
 	}
-=======
+}
+
 void CCharacter::ResetInput()
 {
 	m_Input.m_Direction = 0;
@@ -607,7 +608,6 @@ void CCharacter::ResetInput()
 	m_Input.m_Fire &= INPUT_STATE_MASK;
 	m_Input.m_Jump = 0;
 	m_LatestPrevInput = m_LatestInput = m_Input;
->>>>>>> ca7c82f649fea5f877ae4156387c4ad30d79d6b6
 }
 
 void CCharacter::Tick()
@@ -1183,10 +1183,8 @@ bool CCharacter::TakeDamage(vec2 Force, int Dmg, int From, int Weapon)
 
 	// do damage Hit sound
 	if(From >= 0 && From != m_pPlayer->GetCID() && GameServer()->m_apPlayers[From])
-<<<<<<< HEAD
 		*/GameServer()->CreateSound(GameServer()->m_apPlayers[From]->m_ViewPos, SOUND_HIT, CmaskOne(From));
 /*
-=======
 	{
 		int Mask = CmaskOne(From);
 		for(int i = 0; i < MAX_CLIENTS; i++)
@@ -1197,7 +1195,6 @@ bool CCharacter::TakeDamage(vec2 Force, int Dmg, int From, int Weapon)
 		GameServer()->CreateSound(GameServer()->m_apPlayers[From]->m_ViewPos, SOUND_HIT, Mask);
 	}
 
->>>>>>> ca7c82f649fea5f877ae4156387c4ad30d79d6b6
 	// check for death
 	if(m_Health <= 0)
 	{

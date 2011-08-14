@@ -252,7 +252,8 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 							(!m_lFriends[f].m_pFriendInfo->m_aName[0] || NameHash == m_lFriends[f].m_pFriendInfo->m_NameHash))
 						{
 							m_lFriends[f].m_NumFound++;
-							break;
+							if(m_lFriends[f].m_pFriendInfo->m_aName[0])
+								break;
 						}
 					}
 				}
@@ -515,7 +516,7 @@ void CMenus::RenderServerbrowserFilters(CUIRect View)
 	ServerFilter.HSplitTop(20.0f, &Button, &ServerFilter);
 	if (DoButton_CheckBox((char *)&g_Config.m_BrFilterPureMap, Localize("Standard map"), g_Config.m_BrFilterPureMap, &Button))
 		g_Config.m_BrFilterPureMap ^= 1;
-	
+
 	ServerFilter.HSplitTop(20.0f, &Button, &ServerFilter);
 	if (DoButton_CheckBox((char *)&g_Config.m_BrFilterGametypeStrict, Localize("Strict gametype filter"), g_Config.m_BrFilterGametypeStrict, &Button))
 		g_Config.m_BrFilterGametypeStrict ^= 1;
@@ -562,7 +563,7 @@ void CMenus::RenderServerbrowserFilters(CUIRect View)
 		Button.HMargin(3.0f, &Button);
 		if(DoButton_CheckBox(&g_Config.m_BrFilterCountry, Localize("Player country:"), g_Config.m_BrFilterCountry, &Button))
 			g_Config.m_BrFilterCountry ^= 1;
-		
+
 		float OldWidth = Rect.w;
 		Rect.w = Rect.h*2;
 		Rect.x += (OldWidth-Rect.w)/2.0f;
@@ -582,17 +583,21 @@ void CMenus::RenderServerbrowserFilters(CUIRect View)
 	static int s_ClearButton = 0;
 	if(DoButton_Menu(&s_ClearButton, Localize("Reset filter"), 0, &Button))
 	{
+		g_Config.m_BrFilterString[0] = 0;
 		g_Config.m_BrFilterFull = 0;
 		g_Config.m_BrFilterEmpty = 0;
+		g_Config.m_BrFilterSpectators = 0;
+		g_Config.m_BrFilterFriends = 0;
+		g_Config.m_BrFilterCountry = 0;
+		g_Config.m_BrFilterCountryIndex = -1;
 		g_Config.m_BrFilterPw = 0;
 		g_Config.m_BrFilterPing = 999;
 		g_Config.m_BrFilterGametype[0] = 0;
+		g_Config.m_BrFilterGametypeStrict = 0;
 		g_Config.m_BrFilterServerAddress[0] = 0;
-		g_Config.m_BrFilterCompatversion = 1;
-		g_Config.m_BrFilterString[0] = 0;
 		g_Config.m_BrFilterPure = 1;
 		g_Config.m_BrFilterPureMap = 1;
-		g_Config.m_BrFilterGametypeStrict = 0;
+		g_Config.m_BrFilterCompatversion = 1;
 		Client()->ServerBrowserUpdate();
 	}
 }

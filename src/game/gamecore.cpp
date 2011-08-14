@@ -326,7 +326,7 @@ void CCharacterCore::Tick(bool UseInput)
 		}
 	}
 
-	if(m_pWorld && m_pWorld->m_Tuning.m_PlayerCollision)
+	if(m_pWorld)
 	{
 		for(int i = 0; i < MAX_CLIENTS; i++)
 		{
@@ -341,7 +341,7 @@ void CCharacterCore::Tick(bool UseInput)
 			// handle player <-> player collision
 			float Distance = distance(m_Pos, pCharCore->m_Pos);
 			vec2 Dir = normalize(m_Pos - pCharCore->m_Pos);
-			if(Distance < PhysSize*1.25f && Distance > 0.0f)
+			if(m_pWorld->m_Tuning.m_PlayerCollision && Distance < PhysSize*1.25f && Distance > 0.0f)
 			{
 				float a = (PhysSize*1.45f - Distance);
 
@@ -354,7 +354,7 @@ void CCharacterCore::Tick(bool UseInput)
 			}
 
 			// handle hook influence
-			if(m_HookedPlayer == i)
+			if(m_HookedPlayer == i && m_pWorld->m_Tuning.m_PlayerHooking)
 			{
 				if(Distance > PhysSize*1.50f) // TODO: fix tweakable variable
 				{
@@ -394,6 +394,7 @@ void CCharacterCore::Move()
 		// check player collision
 		float Distance = distance(m_Pos, NewPos);
 		int End = Distance+1;
+		vec2 LastPos = m_Pos;
 		for(int i = 0; i < End; i++)
 		{
 			float a = i/Distance;
@@ -409,14 +410,22 @@ void CCharacterCore::Move()
 					if(a > 0.0f)
 						m_Pos = Pos;
 					else
+				if(D < 28.0f && D > 0.0f)
+				{
+					if(a > 0.0f)
+						m_Pos = LastPos;
+					else if(distance(NewPos, pCharCore->m_Pos) > D)
+
 						m_Pos = NewPos;
 					return;
 				}
 			}
+			LastPos = Pos;
 		}
 	}
 
-	m_Pos = NewPos;
+		m_Pos = NewPos;
+		}
 }
 
 void CCharacterCore::Write(CNetObj_CharacterCore *pObjCore)
