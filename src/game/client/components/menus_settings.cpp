@@ -208,10 +208,7 @@ void CMenus::RenderSettingsPlayer(CUIRect MainView)
 
 	for(int i = 0; i < m_pClient->m_pCountryFlags->Num(); ++i)
 	{
-		const CCountryFlags::CCountryFlag *pEntry = m_pClient->m_pCountryFlags->Get(i);
-		if(pEntry == 0)
-			continue;
-
+		const CCountryFlags::CCountryFlag *pEntry = m_pClient->m_pCountryFlags->GetByIndex(i);
 		if(pEntry->m_CountryCode == g_Config.m_PlayerCountry)
 			OldSelected = i;
 
@@ -234,7 +231,7 @@ void CMenus::RenderSettingsPlayer(CUIRect MainView)
 	const int NewSelected = UiDoListboxEnd(&s_ScrollValue, 0);
 	if(OldSelected != NewSelected)
 	{
-		g_Config.m_PlayerCountry = m_pClient->m_pCountryFlags->Get(NewSelected)->m_CountryCode;
+		g_Config.m_PlayerCountry = m_pClient->m_pCountryFlags->GetByIndex(NewSelected)->m_CountryCode;
 		m_NeedSendinfo = true;
 	}
 }
@@ -627,7 +624,8 @@ void CMenus::RenderSettingsGraphics(CUIRect MainView)
 	// display mode list
 	static float s_ScrollValue = 0;
 	int OldSelected = -1;
-	str_format(aBuf, sizeof(aBuf), "%s: %dx%d %d bit", Localize("Current"), s_GfxScreenWidth, s_GfxScreenHeight, s_GfxColorDepth);
+	int G = gcd(s_GfxScreenWidth, s_GfxScreenHeight);
+	str_format(aBuf, sizeof(aBuf), "%s: %dx%d %d bit (%d:%d)", Localize("Current"), s_GfxScreenWidth, s_GfxScreenHeight, s_GfxColorDepth, s_GfxScreenWidth/G, s_GfxScreenHeight/G);
 	UiDoListboxStart(&s_NumNodes , &ModeList, 24.0f, Localize("Display Modes"), aBuf, s_NumNodes, 1, OldSelected, s_ScrollValue);
 
 	for(int i = 0; i < s_NumNodes; ++i)
@@ -643,7 +641,8 @@ void CMenus::RenderSettingsGraphics(CUIRect MainView)
 		CListboxItem Item = UiDoListboxNextItem(&s_aModes[i], OldSelected == i);
 		if(Item.m_Visible)
 		{
-			str_format(aBuf, sizeof(aBuf), " %dx%d %d bit", s_aModes[i].m_Width, s_aModes[i].m_Height, Depth);
+			int G = gcd(s_aModes[i].m_Width, s_aModes[i].m_Height);
+			str_format(aBuf, sizeof(aBuf), " %dx%d %d bit (%d:%d)", s_aModes[i].m_Width, s_aModes[i].m_Height, Depth, s_aModes[i].m_Width/G, s_aModes[i].m_Height/G);
 			UI()->DoLabelScaled(&Item.m_Rect, aBuf, 16.0f, -1);
 		}
 	}
@@ -757,7 +756,10 @@ void CMenus::RenderSettingsSound(CUIRect MainView)
 	{
 		g_Config.m_SndEnable ^= 1;
 		if(g_Config.m_SndEnable)
-			m_pClient->m_pSounds->Play(CSounds::CHN_MUSIC, SOUND_MENU, 1.0f, vec2(0, 0));
+		{
+			if(g_Config.m_SndMusic)
+				m_pClient->m_pSounds->Play(CSounds::CHN_MUSIC, SOUND_MENU, 1.0f, vec2(0, 0));
+		}
 		else
 			m_pClient->m_pSounds->Stop(SOUND_MENU);
 		m_NeedRestartSound = g_Config.m_SndEnable && (!s_SndEnable || s_SndRate != g_Config.m_SndRate);

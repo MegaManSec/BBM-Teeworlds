@@ -93,7 +93,7 @@ void CGameContext::CreateDamageInd(vec2 Pos, float Angle, int Amount)
 	for(int i = 0; i < Amount; i++)
 	{
 		float f = mix(s, e, float(i+1)/float(Amount+2));
-		NETEVENT_DAMAGEIND *pEvent = (NETEVENT_DAMAGEIND *)m_Events.Create(NETEVENTTYPE_DAMAGEIND, sizeof(NETEVENT_DAMAGEIND));
+		CNetEvent_DamageInd *pEvent = (CNetEvent_DamageInd *)m_Events.Create(NETEVENTTYPE_DAMAGEIND, sizeof(CNetEvent_DamageInd));
 		if(pEvent)
 		{
 			pEvent->m_X = (int)Pos.x;
@@ -106,7 +106,7 @@ void CGameContext::CreateDamageInd(vec2 Pos, float Angle, int Amount)
 void CGameContext::CreateHammerHit(vec2 Pos)
 {
 	// create the event
-	NETEVENT_HAMMERHIT *pEvent = (NETEVENT_HAMMERHIT *)m_Events.Create(NETEVENTTYPE_HAMMERHIT, sizeof(NETEVENT_HAMMERHIT));
+	CNetEvent_HammerHit *pEvent = (CNetEvent_HammerHit *)m_Events.Create(NETEVENTTYPE_HAMMERHIT, sizeof(CNetEvent_HammerHit));
 	if(pEvent)
 	{
 		pEvent->m_X = (int)Pos.x;
@@ -118,7 +118,7 @@ void CGameContext::CreateHammerHit(vec2 Pos)
 void CGameContext::CreateExplosion(vec2 Pos, int Owner, int Weapon, bool NoDamage)
 {
 	// create the event
-	NETEVENT_EXPLOSION *pEvent = (NETEVENT_EXPLOSION *)m_Events.Create(NETEVENTTYPE_EXPLOSION, sizeof(NETEVENT_EXPLOSION));
+	CNetEvent_Explosion *pEvent = (CNetEvent_Explosion *)m_Events.Create(NETEVENTTYPE_EXPLOSION, sizeof(CNetEvent_Explosion));
 	if(pEvent)
 	{
 		pEvent->m_X = (int)Pos.x;
@@ -162,7 +162,7 @@ void create_smoke(vec2 Pos)
 void CGameContext::CreatePlayerSpawn(vec2 Pos)
 {
 	// create the event
-	NETEVENT_SPAWN *ev = (NETEVENT_SPAWN *)m_Events.Create(NETEVENTTYPE_SPAWN, sizeof(NETEVENT_SPAWN));
+	CNetEvent_Spawn *ev = (CNetEvent_Spawn *)m_Events.Create(NETEVENTTYPE_SPAWN, sizeof(CNetEvent_Spawn));
 	if(ev)
 	{
 		ev->m_X = (int)Pos.x;
@@ -173,7 +173,7 @@ void CGameContext::CreatePlayerSpawn(vec2 Pos)
 void CGameContext::CreateDeath(vec2 Pos, int ClientID)
 {
 	// create the event
-	NETEVENT_DEATH *pEvent = (NETEVENT_DEATH *)m_Events.Create(NETEVENTTYPE_DEATH, sizeof(NETEVENT_DEATH));
+	CNetEvent_Death *pEvent = (CNetEvent_Death *)m_Events.Create(NETEVENTTYPE_DEATH, sizeof(CNetEvent_Death));
 	if(pEvent)
 	{
 		pEvent->m_X = (int)Pos.x;
@@ -188,7 +188,7 @@ void CGameContext::CreateSound(vec2 Pos, int Sound, int Mask)
 		return;
 
 	// create a sound
-	NETEVENT_SOUNDWORLD *pEvent = (NETEVENT_SOUNDWORLD *)m_Events.Create(NETEVENTTYPE_SOUNDWORLD, sizeof(NETEVENT_SOUNDWORLD), Mask);
+	CNetEvent_SoundWorld *pEvent = (CNetEvent_SoundWorld *)m_Events.Create(NETEVENTTYPE_SOUNDWORLD, sizeof(CNetEvent_SoundWorld), Mask);
 	if(pEvent)
 	{
 		pEvent->m_X = (int)Pos.x;
@@ -345,7 +345,8 @@ void CGameContext::SendVoteStatus(int ClientID, int Total, int Yes, int No)
 
 void CGameContext::AbortVoteKickOnDisconnect(int ClientID)
 {
-	if(m_VoteCloseTime && !str_comp_num(m_aVoteCommand, "kick ", 5) && str_toint(&m_aVoteCommand[5]) == ClientID)
+	if(m_VoteCloseTime && ((!str_comp_num(m_aVoteCommand, "kick ", 5) && str_toint(&m_aVoteCommand[5]) == ClientID) ||
+		(!str_comp_num(m_aVoteCommand, "set_team ", 9) && str_toint(&m_aVoteCommand[9]) == ClientID)))
 		m_VoteCloseTime = -1;
 }
 
@@ -804,12 +805,12 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 			}
 			if(KickID == ClientID)
 			{
-				SendChatTarget(ClientID, "You cant kick yourself");
+				SendChatTarget(ClientID, "You can't kick yourself");
 				return;
 			}
 			if(Server()->IsAuthed(KickID))
 			{
-				SendChatTarget(ClientID, "You cant kick admins");
+				SendChatTarget(ClientID, "You can't kick admins");
 				char aBufKick[128];
 				str_format(aBufKick, sizeof(aBufKick), "'%s' called for vote to kick you", Server()->ClientName(ClientID));
 				SendChatTarget(KickID, aBufKick);
@@ -844,13 +845,17 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 			}
 			if(SpectateID == ClientID)
 			{
-				SendChatTarget(ClientID, "You cant move yourself");
+				SendChatTarget(ClientID, "You can't move yourself");
 				return;
 			}
 
 			str_format(aChatmsg, sizeof(aChatmsg), "'%s' called for vote to move '%s' to spectators (%s)", Server()->ClientName(ClientID), Server()->ClientName(SpectateID), pReason);
 			str_format(aDesc, sizeof(aDesc), "move '%s' to spectators", Server()->ClientName(SpectateID));
+<<<<<<< HEAD
 			str_format(aCmd, sizeof(aCmd), "set_team %d -1", SpectateID);*/
+=======
+			str_format(aCmd, sizeof(aCmd), "set_team %d -1 %d", SpectateID, g_Config.m_SvVoteSpectateRejoindelay);
+>>>>>>> ca7c82f649fea5f877ae4156387c4ad30d79d6b6
 		}
 
 		if(aCmd[0])
@@ -886,6 +891,16 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 		if(pPlayer->GetTeam() == pMsg->m_Team || (g_Config.m_SvSpamprotection && pPlayer->m_LastSetTeam && pPlayer->m_LastSetTeam+Server()->TickSpeed()*3 > Server()->Tick()))
 			return;
 
+		if(pPlayer->m_TeamChangeTick > Server()->Tick())
+		{
+			pPlayer->m_LastSetTeam = Server()->Tick();
+			int TimeLeft = (pPlayer->m_TeamChangeTick - Server()->Tick())/Server()->TickSpeed();
+			char aBuf[128];
+			str_format(aBuf, sizeof(aBuf), "Time to wait before changing team: %02d:%02d", TimeLeft/60, TimeLeft%60);
+			SendBroadcast(aBuf, ClientID);
+			return;
+		}
+
 		// Switch team on given client and kill/respawn him
 		if(m_pController->CanJoinTeam(pMsg->m_Team, ClientID))
 		{
@@ -896,6 +911,7 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 					m_VoteUpdate = true;
 				pPlayer->SetTeam(pMsg->m_Team);
 				(void)m_pController->CheckTeamBalance();
+				pPlayer->m_TeamChangeTick = Server()->Tick();
 			}
 			else
 				SendBroadcast("Teams must be balanced, please join other team", ClientID);
@@ -1182,6 +1198,9 @@ void CGameContext::ConSetTeam(IConsole::IResult *pResult, void *pUserData)
 	CGameContext *pSelf = (CGameContext *)pUserData;
 	int ClientID = clamp(pResult->GetInteger(0), 0, (int)MAX_CLIENTS-1);
 	int Team = clamp(pResult->GetInteger(1), -1, 1);
+	int Delay = 0;
+	if(pResult->NumArguments() > 2)
+		Delay = pResult->GetInteger(2);
 
 	char aBuf[256];
 	str_format(aBuf, sizeof(aBuf), "moved client %d to team %d", ClientID, Team);
@@ -1190,6 +1209,7 @@ void CGameContext::ConSetTeam(IConsole::IResult *pResult, void *pUserData)
 	if(!pSelf->m_apPlayers[ClientID])
 		return;
 
+	pSelf->m_apPlayers[ClientID]->m_TeamChangeTick = pSelf->Server()->Tick()+pSelf->Server()->TickSpeed()*Delay*60;
 	pSelf->m_apPlayers[ClientID]->SetTeam(Team);
 	(void)pSelf->m_pController->CheckTeamBalance();
 }
@@ -1406,7 +1426,7 @@ void CGameContext::ConForceVote(IConsole::IResult *pResult, void *pUserData)
 			return;
 		}
 
-		str_format(aBuf, sizeof(aBuf), "set_team %d -1", SpectateID);
+		str_format(aBuf, sizeof(aBuf), "set_team %d -1 %d", SpectateID, g_Config.m_SvVoteSpectateRejoindelay);
 		pSelf->Console()->ExecuteLine(aBuf);
 	}
 }
@@ -1463,7 +1483,7 @@ void CGameContext::OnConsoleInit()
 	Console()->Register("restart", "?i", CFGFLAG_SERVER|CFGFLAG_STORE, ConRestart, this, "");
 	Console()->Register("broadcast", "r", CFGFLAG_SERVER, ConBroadcast, this, "");
 	Console()->Register("say", "r", CFGFLAG_SERVER, ConSay, this, "");
-	Console()->Register("set_team", "ii", CFGFLAG_SERVER, ConSetTeam, this, "");
+	Console()->Register("set_team", "ii?i", CFGFLAG_SERVER, ConSetTeam, this, "");
 	Console()->Register("set_team_all", "i", CFGFLAG_SERVER, ConSetTeamAll, this, "");
 
 	Console()->Register("add_vote", "sr", CFGFLAG_SERVER, ConAddVote, this, "");

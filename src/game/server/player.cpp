@@ -21,7 +21,11 @@ CPlayer::CPlayer(CGameContext *pGameServer, int ClientID, int Team)
 	m_Team = GameServer()->m_pController->ClampTeam(Team);
 	m_SpectatorID = SPEC_FREEVIEW;
 	m_LastActionTick = Server()->Tick();
+<<<<<<< HEAD
 	slot3 = 0;
+=======
+	m_TeamChangeTick = Server()->Tick();
+>>>>>>> ca7c82f649fea5f877ae4156387c4ad30d79d6b6
 }
 
 CPlayer::~CPlayer()
@@ -176,9 +180,19 @@ void CPlayer::OnPredictedInput(CNetObj_PlayerInput *NewInput)
 
 void CPlayer::OnDirectInput(CNetObj_PlayerInput *NewInput)
 {
-	// skip the input if chat is active
-	if((m_PlayerFlags&PLAYERFLAG_CHATTING) && (NewInput->m_PlayerFlags&PLAYERFLAG_CHATTING))
-		return;
+	if(NewInput->m_PlayerFlags&PLAYERFLAG_CHATTING)
+	{
+		// skip the input if chat is active
+		if(m_PlayerFlags&PLAYERFLAG_CHATTING)
+			return;
+
+		// reset input
+		if(m_pCharacter)
+			m_pCharacter->ResetInput();
+
+		m_PlayerFlags = NewInput->m_PlayerFlags;
+ 		return;
+	}
 
 	m_PlayerFlags = NewInput->m_PlayerFlags;
 

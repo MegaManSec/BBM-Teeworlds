@@ -511,7 +511,7 @@ Shotgun
 Show chat
 == Показать чат
 
-Show friends
+Show friends only
 == Показывать друзей
 
 Show ingame HUD
@@ -667,6 +667,9 @@ no limit
 ##### needs translation #####
 
 Demofile: %s
+== 
+
+Player country:
 == 
 
 Strict gametype filter

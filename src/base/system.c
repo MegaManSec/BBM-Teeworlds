@@ -843,11 +843,13 @@ static int priv_net_create_socket(int domain, int type, struct sockaddr *addr, i
 	}
 
 	/* set to IPv6 only if thats what we are creating */
+#if defined(IPV6_V6ONLY)	/* windows sdk 6.1 and higher */
 	if(domain == AF_INET6)
 	{
 		int ipv6only = 1;
 		setsockopt(sock, IPPROTO_IPV6, IPV6_V6ONLY, (const char*)&ipv6only, sizeof(ipv6only));
 	}
+#endif
 
 	/* bind the socket */
 	e = bind(sock, addr, sockaddrlen);
@@ -1551,6 +1553,15 @@ int str_comp_nocase(const char *a, const char *b)
 	return _stricmp(a,b);
 #else
 	return strcasecmp(a,b);
+#endif
+}
+
+int str_comp_nocase_num(const char *a, const char *b, const int num)
+{
+#if defined(CONF_FAMILY_WINDOWS)
+	return _strnicmp(a, b, num);
+#else
+	return strncasecmp(a, b, num);
 #endif
 }
 
