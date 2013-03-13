@@ -1,3 +1,9 @@
+This is the source code for the Teeworlds (0.6) modification, named BBM.
+It is here for legacy purposes, and no support is offered for it. Do not ask for it.
+The client does not compile, but the server works fine. 
+
+----
+
 BBM mod by learath2, Julian->Assange and Fisted.
 
 
